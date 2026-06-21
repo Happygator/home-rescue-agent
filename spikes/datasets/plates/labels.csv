@@ -1,0 +1,9 @@
+filename,true_model,brand,appliance,difficulty,notes
+user_plate_01_samsung_fridge.jpg,RF28T5001SR,Samsung,refrigerator,easy,"clean close-up; full model code RF28T5001SR/AA; S/N 0B5X4BBW702340W; mfg JUL.2023"
+user_plate_02_compact_fridge.jpg,BC-70-62H-US(E),unknown,refrigerator,hard,"AMBIGUOUS: label also shows UKN22YA and S/N BX2509430; no brand logo; ideal multi-candidate / which-is-the-model test"
+user_plate_03_trane_hvac.jpg,4TTR6048J1000AA,Trane,hvac-condenser,hard,"low-contrast silver foil label + glare; OUT of fridge/washer/dishwasher demo scope but strong OCR stress-test; serial 17496MM45F; R-410A"
+user_plate_04_whirlpool_fridge.jpg,WRFF3336SZ,Whirlpool,refrigerator,medium,"wider/slightly blurry shot; trailing suffix 00; serial TME0430033"
+user_plate_05_whirlpool_fridge.jpg,WRFF3336SZ,Whirlpool,refrigerator,easy,"clearer crop of the SAME unit as plate 04 — tests read consistency across image quality"
+user_plate_06_lg_dishwasher.jpg,LDFC2423V,LG,dishwasher,easy,"clean close-up; S/NO 409KWCF1Y587; made in Korea"
+user_plate_07_whirlpool_dryer.jpg,WGD95HEDW0,Whirlpool,dryer,medium,"angled close-up; GAS dryer (safety-relevant); serial M51203944"
+user_plate_08_whirlpool_washer.jpg,WFW95HEDW0,Whirlpool,washer,medium,"angled; fire-hazard warning label in frame (distractor text); serial C51150076"
