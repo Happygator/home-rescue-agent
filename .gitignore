@@ -215,3 +215,6 @@ GEMINI_KEY.txt
 # Generated artifacts / traces
 artifacts/
 .gstack/
+
+# Claude Code project instructions (local only)
+CLAUDE.md
