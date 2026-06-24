@@ -214,3 +214,4 @@ GEMINI_KEY.txt
 
 # Generated artifacts / traces
 artifacts/
+.gstack/

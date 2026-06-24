@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Appliance Fixer - Diagnose and repair household appliances with Gemini AI support.">
+    <title>Appliance Fixer</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Style -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Script -->
+    <script src="app.js" defer></script>
+</head>
+<body class="light-theme">
+    
+    <!-- Top App Bar -->
+    <header class="app-bar">
+        <div class="app-bar-content">
+            <span class="app-logo">🔧 Appliance Fixer</span>
+            <div class="user-avatar">A</div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="main-container">
+        
+        <!-- Dashboard / Tickets List View -->
+        <section id="dashboard-view" class="view-section">
+            <div class="dashboard-header">
+                <div class="dashboard-title-group">
+                    <h1>Open Issues</h1>
+                    <p id="tickets-subtitle" class="subtitle">Loading issues...</p>
+                </div>
+                <button id="btn-new-ticket" class="btn btn-primary">
+                    +   New Issue
+                </button>
+            </div>
+
+            <!-- Tickets Stack Container -->
+            <div class="tickets-stack-wrapper">
+                <div id="tickets-loading" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <p>Loading cases...</p>
+                </div>
+                
+                <div id="tickets-empty" class="empty-state hidden">
+                    <h3>No issues found</h3>
+                    <p>Create a new issue to get started.</p>
+                </div>
+
+                <div id="tickets-grid" class="tickets-stack">
+                    <!-- Ticket cards inserted dynamically here -->
+                </div>
+            </div>
+
+            <!-- Footer status link -->
+            <footer class="dashboard-footer">
+                <span id="footer-text">Showing open issues · <a href="#" id="footer-toggle-link">View resolved (0)</a></span>
+            </footer>
+        </section>
+
+        <!-- Ticket Detail View -->
+        <section id="detail-view" class="view-section hidden">
+            <div class="detail-navigation">
+                <button id="btn-back-to-dashboard" class="btn-back">
+                    ← All issues
+                </button>
+            </div>
+
+            <div class="detail-header">
+                <div class="detail-title-group">
+                    <h1 id="detail-title">Samsung · Refrigerator</h1>
+                    <p id="detail-meta-line" class="detail-meta">Model Number RF28R7201</p>
+                </div>
+                <span id="detail-status-badge" class="status-badge diagnosing">DIAGNOSING</span>
+            </div>
+
+            <div class="detail-split-layout">
+                
+                <!-- Left: Case Summary Panel -->
+                <aside class="detail-summary-panel">
+                    <h2>Case summary</h2>
+                    
+                    <div class="summary-section">
+                        <h3>SYMPTOM</h3>
+                        <p id="detail-symptom" class="symptom-text">Fresh-food warm; freezer cold.</p>
+                    </div>
+
+                    <div class="summary-section" id="detail-photos-section" style="display: none;">
+                        <h3>PHOTOS</h3>
+                        <div id="detail-photos" class="detail-photos-row"></div>
+                    </div>
+
+                    <div class="summary-section">
+                        <h3>DIAGNOSIS</h3>
+                        <div class="diagnosis-block">
+                            <p id="detail-diagnosis-text" class="diagnosis-text">Restricted airflow / dirty coils</p>
+                            <span id="detail-diagnosis-confidence" class="confidence-text">(confidence: medium)</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-section">
+                        <h3>STEPS TAKEN</h3>
+                        <div id="detail-steps-list" class="steps-dot-list">
+                            <!-- Circular dots list rendered dynamically -->
+                        </div>
+                    </div>
+
+                    <hr class="panel-divider">
+
+                    <div class="summary-section">
+                        <h3>NEXT STEP</h3>
+                        <div class="next-step-strip-box">
+                            <p id="detail-next-step" class="next-step-text">Confirm coils are clean, then test the evaporator fan motor.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel-actions">
+                        <button id="btn-escalate" class="btn btn-escalate">Escalate to a pro</button>
+                        <button id="btn-resolve" class="btn btn-resolve-pro">Mark as resolved</button>
+                    </div>
+
+                    <!-- Escalation details box -->
+                    <div id="detail-escalation-block" class="escalation-info-box hidden">
+                        <h4 class="escalation-title">Professional Service Escalation</h4>
+                        <div class="escalation-field">
+                            <label>Recipient:</label>
+                            <span id="escalation-recipient">support@samsung.com</span>
+                        </div>
+                        <div class="escalation-field">
+                            <label>Subject:</label>
+                            <span id="escalation-subject">Service Request...</span>
+                        </div>
+                        <div class="escalation-field">
+                            <label>Email Draft:</label>
+                            <textarea id="escalation-body" readonly class="escalation-textarea" rows="6"></textarea>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Right: Chat interface -->
+                <section class="detail-chat-panel">
+                    <div id="chat-messages" class="chat-messages-container">
+                        <!-- Chat messages rendered dynamically -->
+                    </div>
+
+                    <!-- Typing state loader -->
+                    <div id="chat-typing" class="chat-typing-loader hidden">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+
+                    <!-- Input message controls -->
+                    <div class="chat-input-bar">
+                        <form id="chat-form" class="chat-form">
+                            <input type="text" id="chat-input" placeholder="Type a reply..." required autocomplete="off">
+                            <input type="file" id="chat-photo-input" accept="image/*" class="hidden">
+                            <button type="button" id="btn-chat-attach" class="btn-attach" title="Upload spec plate / symptom photo">
+                                📷
+                            </button>
+                            <button type="submit" id="btn-send-message" class="btn-send">
+                                ➤
+                            </button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <!-- New Ticket Modal -->
+    <div id="new-ticket-modal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div>
+                    <h2>New Issue</h2>
+                    <p class="modal-subtitle">Describe what’s wrong. Add a photo of the spec plate to auto-fill.</p>
+                </div>
+                <button id="modal-close-btn" class="btn-modal-close">&times;</button>
+            </div>
+
+            <form id="new-ticket-form">
+                <div class="modal-body">
+                    
+                    <!-- Scan plate action strip -->
+                    <div class="scan-plate-action-bar" id="btn-trigger-scan">
+                        <span>📷  Scan spec plate — auto-fills brand, model &amp; error code</span>
+                        <input type="file" id="form-plate-scan" accept="image/*" class="hidden">
+                        <span id="plate-scan-spinner" class="scan-spinner hidden">⚡ Processing...</span>
+                        <span id="plate-scan-status" class="scan-success-tick hidden">✓ Done!</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Appliance type</label>
+                        <select id="form-appliance" class="form-select" required>
+                            <option value="refrigerator" selected>Refrigerator</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Brand</label>
+                            <input type="text" id="form-brand" class="form-control" placeholder="e.g. Samsung" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Model number</label>
+                            <input type="text" id="form-model" class="form-control" placeholder="e.g. RF28R7201..." required>
+                            <span id="model-validation-status" class="validation-label hidden"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>What’s wrong?</label>
+                        <textarea id="form-symptom" class="form-control" rows="3" placeholder="Fresh-food side is warm but the freezer is still cold..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Error code <span class="label-optional">(optional)</span></label>
+                        <input type="text" id="form-error-code" class="form-control" placeholder="e.g. 22 E">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="btn-submit-ticket" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

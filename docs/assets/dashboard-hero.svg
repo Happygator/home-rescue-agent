@@ -1,0 +1,112 @@
+<svg viewBox="0 0 470 924" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="heroBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EEF2FF"/>
+      <stop offset="1" stop-color="#DBEAFE"/>
+    </linearGradient>
+    <linearGradient id="hdr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+    <filter id="card" x="-8%" y="-12%" width="116%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+    <filter id="fab" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#2563EB" flood-opacity="0.45"/>
+    </filter>
+    <filter id="deviceShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="26" flood-color="#0F172A" flood-opacity="0.30"/>
+    </filter>
+    <clipPath id="screen"><rect x="40" y="40" width="390" height="844" rx="38"/></clipPath>
+  </defs>
+
+  <rect width="470" height="924" fill="url(#heroBg)"/>
+
+  <!-- Side buttons -->
+  <rect x="24" y="188" width="4" height="38" rx="2" fill="#0B1220"/>
+  <rect x="24" y="240" width="4" height="62" rx="2" fill="#0B1220"/>
+  <rect x="442" y="214" width="4" height="74" rx="2" fill="#0B1220"/>
+
+  <!-- Device body -->
+  <rect x="28" y="28" width="414" height="868" rx="52" fill="#0B1220" filter="url(#deviceShadow)"/>
+
+  <!-- Screen -->
+  <g clip-path="url(#screen)">
+    <svg x="40" y="40" width="390" height="844" viewBox="0 0 390 844">
+      <rect width="390" height="844" fill="#F8FAFC"/>
+
+      <!-- Header -->
+      <rect width="390" height="100" fill="url(#hdr)"/>
+      <text x="22" y="29" fill="#FFFFFF" font-size="13" font-weight="600">9:41</text>
+      <rect x="312" y="26" width="3" height="4" fill="#FFFFFF"/>
+      <rect x="318" y="23" width="3" height="7" fill="#FFFFFF"/>
+      <rect x="324" y="20" width="3" height="10" fill="#FFFFFF"/>
+      <rect x="350" y="20" width="20" height="10" rx="2" fill="none" stroke="#FFFFFF" stroke-width="1.2"/>
+      <rect x="352" y="22" width="13" height="6" rx="1" fill="#FFFFFF"/>
+      <rect x="371" y="22.5" width="2" height="5" rx="1" fill="#FFFFFF"/>
+      <text x="20" y="80" font-size="20">&#128295;</text>
+      <text x="50" y="80" fill="#FFFFFF" font-size="17" font-weight="700">Appliance Fixer</text>
+      <circle cx="356" cy="72" r="15" fill="#334155"/>
+      <text x="356" y="77" fill="#FFFFFF" font-size="12" font-weight="600" text-anchor="middle">A</text>
+
+      <!-- Section title -->
+      <text x="16" y="136" fill="#0F172A" font-size="22" font-weight="700">Open Issues</text>
+      <text x="16" y="158" fill="#64748B" font-size="12">3 unresolved &#183; most recent first</text>
+
+      <!-- Card A: diagnosing -->
+      <rect x="16" y="178" width="358" height="148" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
+      <rect x="16" y="192" width="4" height="120" rx="2" fill="#F59E0B"/>
+      <text x="30" y="208" font-size="15.5" font-weight="700" fill="#0F172A">Samsung &#183; Refrigerator</text>
+      <rect x="254" y="196" width="104" height="22" rx="11" fill="#FEF3C7"/>
+      <circle cx="268" cy="207" r="3" fill="#F59E0B"/>
+      <text x="278" y="211" font-size="11" font-weight="700" fill="#B45309">DIAGNOSING</text>
+      <text x="30" y="230" font-size="11.5" fill="#94A3B8">RF28R7201 &#183; updated 2h ago</text>
+      <text x="30" y="254" font-size="12.5" fill="#475569">Fresh-food warm; freezer still cold.</text>
+      <rect x="30" y="266" width="314" height="46" rx="8" fill="#EFF6FF"/>
+      <text x="42" y="284" font-size="12" fill="#1E40AF"><tspan font-weight="700">Next &#8594;</tspan> Confirm coils are clean,</text>
+      <text x="42" y="302" font-size="12" fill="#1E40AF">then test the evaporator fan.</text>
+      <text x="350" y="262" font-size="22" fill="#CBD5E1" text-anchor="middle">&#8250;</text>
+
+      <!-- Card B: awaiting you -->
+      <rect x="16" y="340" width="358" height="148" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
+      <rect x="16" y="354" width="4" height="120" rx="2" fill="#3B82F6"/>
+      <text x="30" y="370" font-size="15.5" font-weight="700" fill="#0F172A">Whirlpool &#183; Refrigerator</text>
+      <rect x="242" y="358" width="116" height="22" rx="11" fill="#DBEAFE"/>
+      <circle cx="256" cy="369" r="3" fill="#3B82F6"/>
+      <text x="266" y="373" font-size="11" font-weight="700" fill="#1D4ED8">AWAITING YOU</text>
+      <text x="30" y="392" font-size="11.5" fill="#94A3B8">WRX735SDHZ &#183; updated 1d ago</text>
+      <text x="30" y="416" font-size="12.5" fill="#475569">Ice maker stopped; water still works.</text>
+      <rect x="30" y="428" width="314" height="46" rx="8" fill="#EFF6FF"/>
+      <text x="42" y="446" font-size="12" fill="#1E40AF"><tspan font-weight="700">Next &#8594;</tspan> Check the water-line shutoff</text>
+      <text x="42" y="464" font-size="12" fill="#1E40AF">valve, then report back.</text>
+      <text x="350" y="424" font-size="22" fill="#CBD5E1" text-anchor="middle">&#8250;</text>
+
+      <!-- Card C: escalated -->
+      <rect x="16" y="502" width="358" height="148" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
+      <rect x="16" y="516" width="4" height="120" rx="2" fill="#EF4444"/>
+      <text x="30" y="532" font-size="15.5" font-weight="700" fill="#0F172A">LG &#183; Refrigerator</text>
+      <rect x="262" y="520" width="96" height="22" rx="11" fill="#FEE2E2"/>
+      <circle cx="276" cy="531" r="3" fill="#EF4444"/>
+      <text x="286" y="535" font-size="11" font-weight="700" fill="#B91C1C">ESCALATED</text>
+      <text x="30" y="554" font-size="11.5" fill="#94A3B8">LFXS26973S &#183; updated 3d ago</text>
+      <text x="30" y="578" font-size="12.5" fill="#475569">Compressor clicks, no cooling.</text>
+      <rect x="30" y="590" width="314" height="46" rx="8" fill="#FEF2F2"/>
+      <text x="42" y="608" font-size="12" fill="#991B1B"><tspan font-weight="700">Next &#8594;</tspan> Pro service required &#8212;</text>
+      <text x="42" y="626" font-size="12" fill="#991B1B">escalation drafted &amp; ready.</text>
+      <text x="350" y="586" font-size="22" fill="#CBD5E1" text-anchor="middle">&#8250;</text>
+
+      <!-- Footer -->
+      <text x="16" y="686" font-size="13" fill="#64748B">Showing open issues &#183; <tspan fill="#2563EB" font-weight="600">View resolved (4)</tspan></text>
+
+      <!-- FAB -->
+      <circle cx="334" cy="762" r="28" fill="#2563EB" filter="url(#fab)"/>
+      <text x="334" y="773" font-size="30" font-weight="300" fill="#FFFFFF" text-anchor="middle">+</text>
+
+      <!-- Home indicator -->
+      <rect x="145" y="828" width="100" height="5" rx="2.5" fill="#CBD5E1"/>
+    </svg>
+  </g>
+
+  <!-- Dynamic island -->
+  <rect x="200" y="54" width="70" height="22" rx="11" fill="#0B1220"/>
+</svg>

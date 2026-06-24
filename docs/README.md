@@ -14,6 +14,9 @@ are historical snapshots from the planning skills and may be stale; do not edit 
 
 | Doc | What it is |
 |-----|-----------|
+| [DESIGN_COMPLETE.md](./DESIGN_COMPLETE.md) | **The whole picture in one place.** Compiles every locked design decision (product, architecture, frontend, diagnosis flow, safety, data model, tests) into a single reference. |
+| [BUILD_PLAN.md](./BUILD_PLAN.md) | **Start here to build (current).** Rebuild-from-scratch plan for the Flutter mobile app: 16 individually-testable segments (backend → REST → Flutter → E2E) with per-segment verification, a dependency graph, and the quota strategy. Supersedes IMPLEMENTATION_PLAN.md. |
+| [DESIGN_BRAINSTORM.md](./DESIGN_BRAINSTORM.md) | Exploratory thinking behind the design — approaches weighed, alternatives rejected, cross-model brainstorming, parked optional ideas. |
 | [DESIGN.md](./DESIGN.md) | Approved design: the camera+memory hook, the 5 premises (premise #2 RESOLVED), approaches considered |
 | [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | **Start here to build.** Architecture, data model, module map, build order, tasks T1-T8, current status |
 | [TEST_PLAN.md](./TEST_PLAN.md) | What to test and where (for /qa-style verification) |

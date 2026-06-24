@@ -1,0 +1,91 @@
+<svg viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+    <filter id="card" x="-8%" y="-10%" width="116%" height="124%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+    <filter id="btn" x="-40%" y="-40%" width="180%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#2563EB" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect width="390" height="844" fill="#F8FAFC"/>
+
+  <!-- Header -->
+  <rect width="390" height="100" fill="url(#hdr)"/>
+  <text x="22" y="29" fill="#FFFFFF" font-size="13" font-weight="600">9:41</text>
+  <rect x="312" y="26" width="3" height="4" fill="#FFFFFF"/>
+  <rect x="318" y="23" width="3" height="7" fill="#FFFFFF"/>
+  <rect x="324" y="20" width="3" height="10" fill="#FFFFFF"/>
+  <rect x="350" y="20" width="20" height="10" rx="2" fill="none" stroke="#FFFFFF" stroke-width="1.2"/>
+  <rect x="352" y="22" width="13" height="6" rx="1" fill="#FFFFFF"/>
+  <rect x="371" y="22.5" width="2" height="5" rx="1" fill="#FFFFFF"/>
+  <text x="18" y="82" font-size="24" fill="#FFFFFF">&#8249;</text>
+  <text x="40" y="81" fill="#FFFFFF" font-size="16" font-weight="700">Service packet</text>
+
+  <!-- Sub-row -->
+  <text x="16" y="127" font-size="15" font-weight="700" fill="#0F172A">Samsung &#183; Refrigerator</text>
+  <rect x="288" y="112" width="86" height="22" rx="11" fill="#FEE2E2"/>
+  <circle cx="302" cy="123" r="3" fill="#EF4444"/>
+  <text x="312" y="127" font-size="11" font-weight="700" fill="#B91C1C">ESCALATED</text>
+  <text x="16" y="147" font-size="12" fill="#94A3B8">RF28R7201 &#183; case-7f3a9c21</text>
+
+  <!-- Progress banner (in progress) -->
+  <rect x="16" y="160" width="358" height="58" rx="10" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <text x="30" y="182" font-size="12.5" font-weight="700" fill="#1E40AF">Preparing your packet&#8230;</text>
+  <rect x="30" y="190" width="314" height="6" rx="3" fill="#DBEAFE"/>
+  <rect x="30" y="190" width="190" height="6" rx="3" fill="#2563EB"/>
+  <text x="30" y="210" font-size="10.5" fill="#1E40AF">Almost there &#8212; one guided inspection shot to go.</text>
+
+  <!-- Packet contents (assembling) -->
+  <rect x="16" y="230" width="358" height="190" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
+  <text x="30" y="254" font-size="13" font-weight="700" fill="#0F172A">Packet contents</text>
+
+  <text x="32" y="288" font-size="12.5" fill="#22C55E">&#10003;</text>
+  <text x="50" y="288" font-size="12.5" fill="#475569">Appliance &amp; model</text>
+  <text x="344" y="288" font-size="11" fill="#94A3B8" text-anchor="end">Samsung &#183; RF28R7201</text>
+
+  <text x="32" y="314" font-size="12.5" fill="#22C55E">&#10003;</text>
+  <text x="50" y="314" font-size="12.5" fill="#475569">Problem &amp; diagnosis</text>
+  <text x="344" y="314" font-size="11" fill="#94A3B8" text-anchor="end">warm &#183; airflow</text>
+
+  <text x="32" y="340" font-size="12.5" fill="#22C55E">&#10003;</text>
+  <text x="50" y="340" font-size="12.5" fill="#475569">Steps already tried</text>
+  <text x="344" y="340" font-size="11" fill="#94A3B8" text-anchor="end">3 logged</text>
+
+  <circle cx="37" cy="362" r="4" fill="#F59E0B"/>
+  <text x="50" y="366" font-size="12.5" font-weight="600" fill="#475569">Inspection video</text>
+  <text x="344" y="366" font-size="11" font-weight="700" fill="#B45309" text-anchor="end">2 of 4 shots</text>
+
+  <circle cx="37" cy="388" r="4" fill="none" stroke="#CBD5E1" stroke-width="1.5"/>
+  <text x="50" y="392" font-size="12.5" fill="#94A3B8">Warranty status</text>
+  <text x="344" y="392" font-size="11" fill="#94A3B8" text-anchor="end">checking&#8230;</text>
+
+  <!-- Active capture (the gathering step) -->
+  <rect x="16" y="432" width="358" height="204" rx="14" fill="#FFFFFF" stroke="#BFDBFE" filter="url(#card)"/>
+  <text x="30" y="456" font-size="10.5" font-weight="700" fill="#2563EB">NOW &#183; GUIDED VIDEO</text>
+  <text x="344" y="456" font-size="11" font-weight="700" fill="#2563EB" text-anchor="end">Shot 2 of 4</text>
+
+  <rect x="30" y="468" width="314" height="120" rx="10" fill="#0F172A"/>
+  <circle cx="46" cy="484" r="4" fill="#EF4444"/>
+  <text x="56" y="488" font-size="9.5" fill="#FFFFFF" opacity="0.9">REC 0:18</text>
+  <rect x="120" y="490" width="134" height="76" rx="6" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="6 5" opacity="0.7"/>
+  <rect x="160" y="506" width="54" height="24" rx="3" fill="none" stroke="#FFFFFF" stroke-width="1" opacity="0.5"/>
+  <text x="187" y="523" font-size="10" fill="#FFFFFF" opacity="0.6" text-anchor="middle">38&#176;</text>
+  <text x="187" y="552" font-size="11" fill="#FFFFFF" opacity="0.85" text-anchor="middle">Frame the display panel</text>
+
+  <text x="30" y="610" font-size="11" fill="#475569">Show the temperature display so the tech can read the error.</text>
+
+  <!-- Actions -->
+  <rect x="16" y="650" width="358" height="48" rx="12" fill="#2563EB" filter="url(#btn)"/>
+  <text x="195" y="680" font-size="15" font-weight="600" fill="#FFFFFF" text-anchor="middle">Capture this shot</text>
+  <rect x="16" y="708" width="358" height="44" rx="12" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <text x="195" y="735" font-size="13" font-weight="600" fill="#334155" text-anchor="middle">Contact Samsung</text>
+  <text x="195" y="776" font-size="10.5" fill="#94A3B8" text-anchor="middle">Call or email &#8212; reach out now, or finish the packet first.</text>
+
+  <!-- Home indicator -->
+  <rect x="145" y="828" width="100" height="5" rx="2.5" fill="#CBD5E1"/>
+</svg>

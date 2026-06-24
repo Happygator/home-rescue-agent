@@ -1,0 +1,79 @@
+<svg viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+    <filter id="card" x="-8%" y="-10%" width="116%" height="124%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect width="390" height="844" fill="#F8FAFC"/>
+
+  <!-- Header -->
+  <rect width="390" height="100" fill="url(#hdr)"/>
+  <text x="22" y="29" fill="#FFFFFF" font-size="13" font-weight="600">9:41</text>
+  <rect x="312" y="26" width="3" height="4" fill="#FFFFFF"/>
+  <rect x="318" y="23" width="3" height="7" fill="#FFFFFF"/>
+  <rect x="324" y="20" width="3" height="10" fill="#FFFFFF"/>
+  <rect x="350" y="20" width="20" height="10" rx="2" fill="none" stroke="#FFFFFF" stroke-width="1.2"/>
+  <rect x="352" y="22" width="13" height="6" rx="1" fill="#FFFFFF"/>
+  <rect x="371" y="22.5" width="2" height="5" rx="1" fill="#FFFFFF"/>
+  <text x="18" y="82" font-size="24" fill="#FFFFFF">&#8249;</text>
+  <text x="40" y="81" fill="#FFFFFF" font-size="16" font-weight="700">Samsung &#183; Refrigerator</text>
+
+  <!-- Sub-row: model + status -->
+  <text x="16" y="129" font-size="12" fill="#94A3B8">RF28R7201 &#183; case-7f3a9c21</text>
+  <rect x="270" y="114" width="104" height="22" rx="11" fill="#FEF3C7"/>
+  <circle cx="284" cy="125" r="3" fill="#F59E0B"/>
+  <text x="294" y="129" font-size="11" font-weight="700" fill="#B45309">DIAGNOSING</text>
+
+  <!-- Case summary card -->
+  <rect x="16" y="146" width="358" height="224" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
+  <text x="30" y="170" font-size="13" font-weight="700" fill="#0F172A">Case summary</text>
+  <text x="30" y="192" font-size="12.5" fill="#475569">Symptom: Fresh-food warm; freezer cold.</text>
+  <text x="30" y="214" font-size="12.5" fill="#475569">Diagnosis: Restricted airflow / dirty coils</text>
+  <circle cx="34" cy="234" r="3.5" fill="#22C55E"/>
+  <text x="46" y="238" font-size="12" fill="#475569">Set temp to 37&#176;F &#8212; no change</text>
+  <circle cx="34" cy="256" r="3.5" fill="#22C55E"/>
+  <text x="46" y="260" font-size="12" fill="#475569">Cleared vents &#8212; no change</text>
+  <circle cx="34" cy="278" r="3.5" fill="#F59E0B"/>
+  <text x="46" y="282" font-size="12" fill="#475569">Clean condenser coils &#8212; pending</text>
+  <line x1="30" y1="300" x2="344" y2="300" stroke="#E2E8F0"/>
+  <rect x="30" y="310" width="314" height="46" rx="8" fill="#EFF6FF"/>
+  <text x="42" y="328" font-size="12" fill="#1E40AF"><tspan font-weight="700">Next &#8594;</tspan> Confirm coils are clean, then</text>
+  <text x="42" y="346" font-size="12" fill="#1E40AF">test the evaporator fan motor.</text>
+
+  <!-- Escalate -->
+  <rect x="16" y="384" width="358" height="42" rx="10" fill="#FFFFFF" stroke="#FCA5A5"/>
+  <text x="195" y="410" font-size="13" font-weight="600" fill="#B91C1C" text-anchor="middle">Escalate to a pro</text>
+
+  <!-- Chat -->
+  <rect x="16" y="442" width="252" height="54" rx="14" fill="#FFFFFF" stroke="#EAEEF3"/>
+  <text x="30" y="464" font-size="12" fill="#334155">Coils on the back collect dust</text>
+  <text x="30" y="482" font-size="12" fill="#334155">and block cooling &#8212; vacuum them?</text>
+
+  <rect x="166" y="510" width="208" height="38" rx="14" fill="#2563EB"/>
+  <text x="180" y="534" font-size="12" fill="#FFFFFF">Done &#8212; they were pretty dusty.</text>
+
+  <rect x="16" y="562" width="300" height="72" rx="14" fill="#FFFFFF" stroke="#EAEEF3"/>
+  <text x="30" y="584" font-size="12" fill="#334155">Great. Give it 2&#8211;3 hours.</text>
+  <text x="30" y="602" font-size="12" fill="#334155">If still warm, the evaporator</text>
+  <text x="30" y="620" font-size="12" fill="#334155">fan may be failing &#8212; test next.</text>
+
+  <rect x="16" y="648" width="358" height="46" rx="8" fill="#FEF2F2"/>
+  <text x="30" y="666" font-size="11.5" fill="#991B1B">&#9888; I won&#8217;t advise sealed-system or</text>
+  <text x="30" y="684" font-size="11.5" fill="#991B1B">mains-voltage work &#8212; that needs a pro.</text>
+
+  <!-- Input bar -->
+  <rect x="16" y="786" width="256" height="44" rx="22" fill="#FFFFFF" stroke="#E2E8F0"/>
+  <text x="32" y="812" font-size="13" fill="#94A3B8">Type a reply&#8230;</text>
+  <rect x="280" y="786" width="40" height="44" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/>
+  <text x="300" y="814" font-size="16" text-anchor="middle">&#128247;</text>
+  <circle cx="350" cy="808" r="20" fill="#2563EB"/>
+  <text x="350" y="813" font-size="14" fill="#FFFFFF" text-anchor="middle">&#10148;</text>
+
+  <!-- Home indicator -->
+  <rect x="145" y="834" width="100" height="5" rx="2.5" fill="#CBD5E1"/>
+</svg>
