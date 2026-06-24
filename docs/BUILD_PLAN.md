@@ -1,7 +1,7 @@
 # Build Plan: Appliance Fixer (rebuild → Flutter mobile app)
 
 Status: REVIEWED (eng + outside voice) · 2026-06-24
-Stack: Google ADK + Gemini (`gemini-2.5-flash`, multimodal) · SQLite · FastAPI (REST + SSE) · **Flutter mobile app (iOS + Android)**
+Stack: Google ADK + Gemini 3.5 Flash (multimodal) · SQLite · FastAPI (REST + SSE) · **Flutter mobile app (iOS + Android)**
 Canonical design: [DESIGN_COMPLETE.md](./DESIGN_COMPLETE.md) (supersedes [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md), the older `adk web`-only build).
 
 > **Scope decisions (locked 2026-06-24, confirmed in eng review):**
@@ -124,7 +124,7 @@ over a real store) · **widget/E2E** (Flutter) · **smoke** (manual, on device).
 
 ## Phase B — Perception, agent, safety (Gemini calls; gate behind fixtures)
 
-Capture recorded-response fixtures FIRST (DESIGN_COMPLETE §4). Dev on `flash-lite`, confirm once on `flash`.
+Capture recorded-response fixtures FIRST (DESIGN_COMPLETE §4). Production model is **Gemini 3.5 Flash**; dev on a lighter `-lite` bucket to stretch free-tier quota, confirm once on `gemini-3.5-flash`.
 
 ### B3 — Perception tools
 - **Goal:** read the spec plate; canonicalize the model number.
@@ -148,7 +148,7 @@ Capture recorded-response fixtures FIRST (DESIGN_COMPLETE §4). Dev on `flash-li
 - **✅ Verify (isolated):** `pytest tests/evals/diagnosis_eval.py` — first-fix scored 2/1/0, target ≥16/20, **and**
   asserts facts (appliance/brand/model/symptom) are gathered **before** any fix. Unit-assert `awaiting_user` is set
   via `transition()` on a pending step.
-- **Quota:** live (fixtures in CI; one scored `flash` pass).
+- **Quota:** live (fixtures in CI; one scored `gemini-3.5-flash` pass).
 
 ### B6 — SafetyGuard (corrected mechanism — eng-review/Codex #8)
 - **Goal:** deterministic refusal of dangerous work (gas / mains electrical / water-on-electrics / refrigerant) →
@@ -327,7 +327,7 @@ B1 ──┬─ B2 (reopen, HEADLINE) ─ B2.5 (REST contract stub) ────
 6. **X1** — record the core. Then **one** gated optional.
 
 ## Quota strategy (DESIGN_COMPLETE §4)
-- Per-model free-tier: dev on `flash-lite`, confirm once on `flash`. Capture fixtures before recording.
+- Production model is **Gemini 3.5 Flash** (`gemini-3.5-flash`). Per-model free-tier: dev on a lighter `-lite` bucket, confirm once on `gemini-3.5-flash`. Capture fixtures before recording.
 - Quota-free, front-loadable: B1, B2, B2.5, B4, B7, and all of F1–F6.
 
 ---
@@ -339,7 +339,7 @@ B1 ──┬─ B2 (reopen, HEADLINE) ─ B2.5 (REST contract stub) ────
 - **`frontend/` vanilla-JS web app:** working reference for the REST contract + screen behavior; not a deliverable.
 - **`spikes/`:** plate datasets + diagnosis symptoms + answer keys feed `plate_read_eval` / `diagnosis_eval`
   directly. Reuse, don't recollect.
-- **ADK runtime, `DatabaseSessionService`, callbacks, Gemini multimodal, SQLite+JSON1:** framework primitives —
+- **ADK runtime, `DatabaseSessionService`, callbacks, Gemini 3.5 Flash multimodal, SQLite+JSON1:** framework primitives —
   configure, don't reimplement.
 
 ## NOT in scope (explicitly deferred, with rationale)
