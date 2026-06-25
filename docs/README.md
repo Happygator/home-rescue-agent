@@ -37,6 +37,7 @@ are historical snapshots from the planning skills and may be stale; do not edit 
   **open-ended** "build an agent" track (some sources reference a separate fixed "Kaggriculture"
   leaderboard) and the exact deadline (sources conflicted: June 30 vs July 6, 2026). An
   appliance-fixer only counts on the open-ended track.
-- **API billing / quota.** Adding billing to the AI Studio key is currently blocked; dev runs use
-  free-tier model-bucket switching (e.g. `gemini-2.5-flash-lite`) + the harness's slim modes.
-  A confirmation diagnosis run on full `flash` is deferred until quota/billing frees up.
+- **API billing / quota.** Production model is **Gemini 2.5 Flash**. Adding billing to the AI Studio key
+  is currently blocked; dev runs use free-tier model-bucket switching (a lighter `-lite` bucket) + the
+  harness's slim modes. A confirmation diagnosis run on full `gemini-2.5-flash` is deferred until
+  quota/billing frees up.

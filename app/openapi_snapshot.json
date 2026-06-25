@@ -1,0 +1,1091 @@
+{
+  "components": {
+    "schemas": {
+      "Body_upload_media_api_issues__case_id__media_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          },
+          "kind": {
+            "default": "symptom",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_media_api_issues__case_id__media_post",
+        "type": "object"
+      },
+      "CreateIssueRequest": {
+        "properties": {
+          "appliance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "Refrigerator",
+            "title": "Appliance"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "model_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Number"
+          },
+          "symptom": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symptom"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "user-default",
+            "title": "User Id"
+          }
+        },
+        "title": "CreateIssueRequest",
+        "type": "object"
+      },
+      "CreateIssueResponse": {
+        "properties": {
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id"
+        ],
+        "title": "CreateIssueResponse",
+        "type": "object"
+      },
+      "Diagnosis": {
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "string"
+          },
+          "hypothesis": {
+            "title": "Hypothesis",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hypothesis",
+          "confidence"
+        ],
+        "title": "Diagnosis",
+        "type": "object"
+      },
+      "EscalateResponse": {
+        "properties": {
+          "drafted_email": {
+            "title": "Drafted Email",
+            "type": "string"
+          },
+          "inspection_guide": {
+            "items": {
+              "$ref": "#/components/schemas/InspectionShot"
+            },
+            "title": "Inspection Guide",
+            "type": "array"
+          },
+          "packet": {
+            "$ref": "#/components/schemas/Packet"
+          }
+        },
+        "required": [
+          "drafted_email",
+          "inspection_guide",
+          "packet"
+        ],
+        "title": "EscalateResponse",
+        "type": "object"
+      },
+      "Escalation": {
+        "properties": {
+          "drafted_email": {
+            "title": "Drafted Email",
+            "type": "string"
+          },
+          "inspection_guide": {
+            "items": {
+              "$ref": "#/components/schemas/InspectionShot"
+            },
+            "title": "Inspection Guide",
+            "type": "array"
+          },
+          "packet": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Packet"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "recipient": {
+            "title": "Recipient",
+            "type": "string"
+          },
+          "sent": {
+            "default": false,
+            "title": "Sent",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "recipient",
+          "drafted_email"
+        ],
+        "title": "Escalation",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "InspectionShot": {
+        "properties": {
+          "narration": {
+            "title": "Narration",
+            "type": "string"
+          },
+          "shot_no": {
+            "title": "Shot No",
+            "type": "integer"
+          },
+          "what_to_film": {
+            "title": "What To Film",
+            "type": "string"
+          },
+          "where": {
+            "title": "Where",
+            "type": "string"
+          }
+        },
+        "required": [
+          "shot_no",
+          "what_to_film",
+          "where",
+          "narration"
+        ],
+        "title": "InspectionShot",
+        "type": "object"
+      },
+      "IssueDetail": {
+        "properties": {
+          "appliance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appliance"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "diagnosis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Diagnosis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "escalation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Escalation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "media": {
+            "items": {
+              "$ref": "#/components/schemas/MediaRef"
+            },
+            "title": "Media",
+            "type": "array"
+          },
+          "model_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Number"
+          },
+          "next_step": {
+            "default": "",
+            "title": "Next Step",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "intake",
+              "diagnosing",
+              "awaiting_user",
+              "escalated",
+              "resolved"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/Step"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "symptom": {
+            "default": "",
+            "title": "Symptom",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "title",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "IssueDetail",
+        "type": "object"
+      },
+      "IssueSummary": {
+        "properties": {
+          "appliance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appliance"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "model_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Number"
+          },
+          "next_step": {
+            "default": "",
+            "title": "Next Step",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "intake",
+              "diagnosing",
+              "awaiting_user",
+              "escalated",
+              "resolved"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "symptom": {
+            "default": "",
+            "title": "Symptom",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "title",
+          "status",
+          "updated_at"
+        ],
+        "title": "IssueSummary",
+        "type": "object"
+      },
+      "MediaRef": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "plate",
+              "symptom",
+              "inspection_video"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "mime": {
+            "title": "Mime",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "taken_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taken At"
+          }
+        },
+        "required": [
+          "kind",
+          "ref",
+          "mime"
+        ],
+        "title": "MediaRef",
+        "type": "object"
+      },
+      "MediaResponse": {
+        "properties": {
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref"
+        ],
+        "title": "MediaResponse",
+        "type": "object"
+      },
+      "MessageRequest": {
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "MessageRequest",
+        "type": "object"
+      },
+      "Packet": {
+        "properties": {
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "shots_captured": {
+            "default": 0,
+            "title": "Shots Captured",
+            "type": "integer"
+          },
+          "shots_total": {
+            "default": 0,
+            "title": "Shots Total",
+            "type": "integer"
+          },
+          "steps_tried": {
+            "title": "Steps Tried",
+            "type": "integer"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "video_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Ref"
+          },
+          "warranty_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warranty Status"
+          }
+        },
+        "required": [
+          "summary",
+          "steps_tried"
+        ],
+        "title": "Packet",
+        "type": "object"
+      },
+      "PlateRequest": {
+        "properties": {
+          "media_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Ref"
+          }
+        },
+        "title": "PlateRequest",
+        "type": "object"
+      },
+      "PlateResponse": {
+        "properties": {
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          }
+        },
+        "title": "PlateResponse",
+        "type": "object"
+      },
+      "ResolveResponse": {
+        "properties": {
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "intake",
+              "diagnosing",
+              "awaiting_user",
+              "escalated",
+              "resolved"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "status"
+        ],
+        "title": "ResolveResponse",
+        "type": "object"
+      },
+      "Step": {
+        "properties": {
+          "instruction": {
+            "title": "Instruction",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "resolved",
+              "not_resolved",
+              "unsure",
+              "skipped",
+              "pending"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "step_id": {
+            "title": "Step Id",
+            "type": "integer"
+          },
+          "user_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Result"
+          }
+        },
+        "required": [
+          "step_id",
+          "instruction",
+          "outcome"
+        ],
+        "title": "Step",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Stub REST and SSE contract for the Appliance Fixer client.",
+    "title": "Appliance Fixer API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/issues": {
+      "get": {
+        "operationId": "list_issues_api_issues_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "open",
+              "title": "Status",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IssueSummary"
+                  },
+                  "title": "Response List Issues Api Issues Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Issues"
+      },
+      "post": {
+        "operationId": "create_issue_api_issues_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateIssueResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Issue"
+      }
+    },
+    "/api/issues/{case_id}": {
+      "get": {
+        "operationId": "get_issue_api_issues__case_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Issue"
+      }
+    },
+    "/api/issues/{case_id}/escalate": {
+      "post": {
+        "operationId": "escalate_issue_api_issues__case_id__escalate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscalateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Escalate Issue"
+      }
+    },
+    "/api/issues/{case_id}/media": {
+      "post": {
+        "operationId": "upload_media_api_issues__case_id__media_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_media_api_issues__case_id__media_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Media"
+      }
+    },
+    "/api/issues/{case_id}/message": {
+      "post": {
+        "operationId": "message_issue_api_issues__case_id__message_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Message Issue"
+      }
+    },
+    "/api/issues/{case_id}/plate": {
+      "post": {
+        "operationId": "read_plate_api_issues__case_id__plate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Read Plate"
+      }
+    },
+    "/api/issues/{case_id}/resolve": {
+      "post": {
+        "operationId": "resolve_issue_api_issues__case_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve Issue"
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 # Comprehensive Design Document
 
 Status: CONSOLIDATED · 2026-06-23 (mobile-app revision)
-Stack: Google ADK + Gemini 3.5 Flash (multimodal) · SQLite · FastAPI · **Flutter mobile app (iOS + Android)**
+Stack: Google ADK + Gemini 2.5 Flash (multimodal) · SQLite · FastAPI · **Flutter mobile app (iOS + Android)**
 
 > This document compiles every design decision made across the project into a single
 > reference. It supersedes nothing — the source documents remain canonical for their
@@ -56,7 +56,7 @@ handoff artifact the service company actually asks for.
 ## 2. Constraints & premises (the ground rules)
 
 ### Constraints
-- Stack: Google ADK + Gemini 3.5 Flash (multimodal) backend; **Flutter mobile client (iOS + Android)** over
+- Stack: Google ADK + Gemini 2.5 Flash (multimodal) backend; **Flutter mobile client (iOS + Android)** over
   the existing FastAPI REST/SSE layer.
 - Graded deliverables: working agent + Kaggle writeup + ~3-min video.
 - Safety is non-negotiable: never advise dangerous gas / electrical / water / refrigerant work.
@@ -116,9 +116,9 @@ Two headline features rested on unverified assumptions. Both were spiked before 
 | **Diagnosis quality** (premise #2) | **21/24 (~88%)** first-fix correct, **0 unsafe**, with NO knowledge base, on the *weaker* `flash-lite` (a conservative lower bound). | **Premise #2 RESOLVED → thin KB.** Don't author a big diagnosis KB. Keep only: error-code→meaning table + safety rules + ~3-5 targeted corrections (e.g. F2 coils-vs-seal, F8 evaporator-vs-condenser fan). |
 | **Resume feasibility** | **PENDING** → built as the Day 1-2 walking skeleton (needs no API calls; not quota-blocked). | Deterministic reopen-by-`case_id` is the real mechanism (see §6, Decision 7). |
 
-> **Model note:** the spikes above ran on the **2.5 Flash family** (`gemini-2.5-flash` / `-lite`); the
-> project has since standardized on **Gemini 3.5 Flash**. These numbers are a conservative lower bound for
-> the newer model — see [SPIKE_RESULTS.md](./SPIKE_RESULTS.md).
+> **Model note:** the spikes above ran on the **2.5 Flash family** (`gemini-2.5-flash` / `-lite`) — the
+> same family the project has standardized on, so these numbers reflect the production model directly.
+> See [SPIKE_RESULTS.md](./SPIKE_RESULTS.md).
 
 **Ops/quota learning (carried forward):** free-tier limits are **per-model** — `gemini-2.5-flash`
 daily cap hit after ~22 calls; `gemini-2.5-flash-lite` is a separate fresh bucket. Adding billing

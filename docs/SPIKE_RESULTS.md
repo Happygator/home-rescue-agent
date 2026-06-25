@@ -2,6 +2,10 @@
 
 Date: 2026-06-21
 Harness: `spikes/` (throwaway). Model: Gemini via AI Studio API key (free tier).
+
+> **Model note:** these spikes ran on the **2.5 Flash family** (`gemini-2.5-flash` / `gemini-2.5-flash-lite`),
+> which the project has standardized on. The numbers below (plate-read 7/8, diagnosis 21/24) reflect what
+> was actually tested on the production model family.
 Datasets: `spikes/datasets/` (8 labeled plate photos + 12 symptoms, sourced from
 iFixit Answers + repair guides; Reddit was blocked to automated fetching).
 

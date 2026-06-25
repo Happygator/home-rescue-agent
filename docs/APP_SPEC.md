@@ -1,6 +1,6 @@
 # App Specification
 
-*Proposed functionality & workflow. Stack: Google ADK + Gemini 3.5 Flash (multimodal) · SQLite · FastAPI · MCP · Flutter (iOS + Android).*
+*Proposed functionality & workflow. Stack: Google ADK + Gemini 2.5 Flash (multimodal) · SQLite · FastAPI · MCP · Flutter (iOS + Android).*
 
 ---
 
@@ -145,7 +145,7 @@ at its manuals folder to make its appliances "AI-ready."
 ## Architecture at a glance
 
 ```
-   Flutter app  ──REST + SSE──▶  FastAPI  ──▶  ADK Agent (Gemini 3.5 Flash)
+   Flutter app  ──REST + SSE──▶  FastAPI  ──▶  ADK Agent (Gemini 2.5 Flash)
    camera · video · share                          │        ▲
                                                    │        │ SafetyGuard
                                        tool calls  │        │ (blocks danger →
@@ -158,7 +158,7 @@ at its manuals folder to make its appliances "AI-ready."
                                     (the saved, resumable case file)
 ```
 
-- **Gemini 3.5 Flash** does two jobs: drives the chat/agent loop, and reads the spec plate from a
+- **Gemini 2.5 Flash** does two jobs: drives the chat/agent loop, and reads the spec plate from a
   photo (vision).
 - **CaseStore** is the app's memory — a SQLite table with **one row per repair**. Each row holds the
   appliance, brand, model, status, and a JSON case file (symptom, error code, every step tried and

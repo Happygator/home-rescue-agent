@@ -8,6 +8,15 @@ __pycache__/
 /out-tsc
 /bazel-out
 
+# Appliance Fixer: local build artifacts
+.pytest_tmp/
+.pytest*tmp*/
+.pytest_cache/
+*.db
+CODEX_TASK_*.md
+media/
+openapi.json.tmp
+
 # C extensions
 *.so
 
@@ -19,7 +28,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -218,3 +227,6 @@ artifacts/
 
 # Claude Code project instructions (local only)
 CLAUDE.md
+
+# pytest temp redirect (see conftest.py)
+.tmp_pytest/
