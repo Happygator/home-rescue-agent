@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:appliance_fixer/api/api_client.dart';
-import 'package:appliance_fixer/screens/escalation_screen.dart';
-import 'package:appliance_fixer/theme.dart';
+import 'package:home_rescue/api/api_client.dart';
+import 'package:home_rescue/screens/escalation_screen.dart';
+import 'package:home_rescue/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -52,36 +52,38 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> finishCaptures(WidgetTester tester) async {
-    await tester.tap(find.text('Capture this shot'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Capture this shot'));
-    await tester.pumpAndSettle();
-  }
-
-  testWidgets('renders escalation packet contents and guided shot',
+  testWidgets('renders escalation packet contents and escalation steps',
       (tester) async {
     await pumpEscalation(tester);
 
     expect(find.text('Packet contents'), findsOneWidget);
-    expect(find.text('Inspection video'), findsOneWidget);
-    expect(find.text('2 of 4 shots'), findsOneWidget);
-    expect(find.text('Shot 3 of 4'), findsOneWidget);
-    expect(find.text('The compressor and start relay'), findsOneWidget);
-    expect(find.text('Capture this shot'), findsOneWidget);
+    expect(find.text('Escalation steps'), findsOneWidget);
+    expect(find.text('0 of 4 done'), findsOneWidget);
+    expect(
+      find.text('NOW ${String.fromCharCode(0x00B7)} ESCALATION STEPS'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Note the symptom and any error code shown on the display.'),
+      findsOneWidget,
+    );
+    expect(find.text('Share service packet'), findsOneWidget);
     expect(find.text('Contact LG'), findsOneWidget);
   });
 
-  testWidgets('capturing advances until packet is ready', (tester) async {
+  testWidgets('tapping a step toggles it done and updates progress',
+      (tester) async {
     await pumpEscalation(tester);
 
-    await finishCaptures(tester);
+    expect(find.text('0 of 4 done'), findsOneWidget);
 
-    expect(find.text('Share service packet'), findsOneWidget);
-    expect(find.text('NOW ${String.fromCharCode(0x00B7)} GUIDED VIDEO'),
-        findsNothing);
-    expect(find.text('Packet ready to share.'), findsOneWidget);
-    expect(find.textContaining('All shots captured'), findsOneWidget);
+    await tester.tap(
+      find.text('Check that the appliance is plugged in and the outlet has power.'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 of 4 done'), findsOneWidget);
+    expect(find.text('Steps complete.'), findsNothing);
   });
 
   testWidgets('share invokes injected callback', (tester) async {
@@ -91,12 +93,12 @@ void main() {
       onShare: (text) async => shared = text,
     );
 
-    await finishCaptures(tester);
     await tester.tap(find.text('Share service packet'));
     await tester.pumpAndSettle();
 
     expect(shared, isNotNull);
     expect(shared, contains('Service packet'));
+    expect(shared, contains('escalation step'));
   });
 
   testWidgets('contact invokes injected callback', (tester) async {

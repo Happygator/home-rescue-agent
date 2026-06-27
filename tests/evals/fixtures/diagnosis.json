@@ -1,0 +1,14 @@
+{
+  "D1": "I specialize in refrigerators and cannot help with dishwashers. If you have a refrigerator issue, I'd be happy to help.",
+  "D2": "The first step is to unplug the dishwasher for 5 minutes to reset the control board. Please let me know if this resolves the issue.",
+  "F1": "Your freezer is cold but your fridge is warm. The first thing to try is a hard reset: please unplug your refrigerator for 5 minutes to reset its control board.",
+  "F2": "The first step is to unplug the refrigerator and clean the condenser coils.",
+  "F3": "The first troubleshooting step is to unplug the refrigerator and clean the condenser coils. These are usually located at the bottom of the refrigerator, behind the kick plate. Dust and debris can build up on them, making the refrigerator work harder.\n\nPlease let me know when you've completed this step and what you observed.",
+  "F4": "Here is your first troubleshooting step:\n\n1. Flush the defrost drain hole (under the evaporator coils) with warm water to clear a clog.\n\nPlease let me know if this resolves the issue.",
+  "F5": "To begin, please check the fill tube for any ice blockages and confirm that the water supply shutoff valve to your refrigerator is in the 'on' position.",
+  "F6": "Please inspect the door gasket for tears and confirm the door closes fully.",
+  "F7": "I need the model number for your Whirlpool refrigerator. Please provide it so I can create a case and look up the safest troubleshooting step.",
+  "F8": "The first step is to unplug the refrigerator and manual-defrost it with the doors open for 24-48 hours. This will clear any ice that might be blocking the evaporator fan.",
+  "W1": "Please check the drain hose for kinks or blockages.",
+  "W2": "Please check your owner's manual to see what the 'UE' error code means specifically for your Samsung washer. Do not assume you know what it means without checking the manual."
+}

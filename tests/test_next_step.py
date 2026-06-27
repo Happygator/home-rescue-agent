@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from appliance_fixer.case_store import CaseStore
-from appliance_fixer.grounding import get_fixes
-from appliance_fixer.next_step import ESCALATED_NEXT, derive_next_step
+from home_rescue.case_store import CaseStore
+from home_rescue.grounding import get_fixes
+from home_rescue.next_step import ESCALATED_NEXT, derive_next_step
 
 
 def _store(tmp_path):

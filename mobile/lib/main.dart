@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'theme.dart';
-import 'screens/home_screen.dart';
+import 'nav.dart';
+import 'screens/root_scaffold.dart';
 import 'screens/issue_detail_screen.dart';
 import 'screens/escalation_screen.dart';
 import 'screens/new_issue_screen.dart';
 
-void main() => runApp(const ApplianceFixerApp());
+void main() => runApp(const HomeRescueApp());
 
 // Optional deep-link entry point used for deterministic screenshots/QA. Normal launches
 // (no dart-define) land on Home. Build with e.g.
@@ -13,8 +14,8 @@ void main() => runApp(const ApplianceFixerApp());
 const _startRoute = String.fromEnvironment('START_ROUTE');
 const _startCase = String.fromEnvironment('START_CASE', defaultValue: 'case-7f3a9c21');
 
-class ApplianceFixerApp extends StatelessWidget {
-  const ApplianceFixerApp({super.key});
+class HomeRescueApp extends StatelessWidget {
+  const HomeRescueApp({super.key});
 
   Widget _home() {
     switch (_startRoute) {
@@ -25,15 +26,16 @@ class ApplianceFixerApp extends StatelessWidget {
       case 'new':
         return const NewIssueScreen();
       default:
-        return const HomeScreen();
+        return const RootScaffold();
     }
   }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'Appliance Fixer',
+        title: 'HomeRescue',
         debugShowCheckedModeBanner: false,
         theme: buildAppTheme(),
+        navigatorObservers: [routeObserver],
         home: _home(),
       );
 }

@@ -1,6 +1,6 @@
 {
-    "name": "appliance_fixer",
-    "short_name": "appliance_fixer",
+    "name": "home_rescue",
+    "short_name": "home_rescue",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

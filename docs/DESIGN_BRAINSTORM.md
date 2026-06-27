@@ -152,7 +152,7 @@ Mocking the partner server as a **standalone MCP server the agent connects to vi
 2. **It makes the architecture legible** — the demo visibly shows a seam where a real OEM plugs in.
    That is the "this is a product, not a prompt" signal.
 3. **It bolts onto the existing seam with almost no churn.** `lookup_fixes` → `get_fixes`
-   ([grounding.py](../appliance_fixer/grounding.py)) already isolates the data lookup; registering
+   ([grounding.py](../home_rescue/grounding.py)) already isolates the data lookup; registering
    the mock as an `MCPToolset` so its tools sit behind that lookup moves "hardcoded KB" → "partner
    integration" without touching the agent loop (ADK speaks MCP natively, so it is configuration, not
    a hand-written client). A graceful fallback to the thin curated layer keeps it consistent with the

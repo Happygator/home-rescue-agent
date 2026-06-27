@@ -10,12 +10,14 @@ from pathlib import Path
 import uvicorn
 from fastapi import Body, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
 
 from app.models import (
     CreateIssueRequest,
     CreateIssueResponse,
+    DeleteIssueResponse,
     EscalateResponse,
+    EscalationStep,
     InspectionShot,
     IssueDetail,
     IssueSummary,
@@ -25,13 +27,15 @@ from app.models import (
     PlateRequest,
     PlateResponse,
     ResolveResponse,
+    UpdateIssueRequest,
 )
 from app.seed_store import seed_store
 from app.store_mappers import case_to_detail, case_to_summary
 from app.turns import default_plate, default_turn
-from appliance_fixer import escalation as esc
-from appliance_fixer.case_store import CaseStore
-from appliance_fixer.transitions import transition
+from home_rescue import escalation as esc
+from home_rescue.appliances import infer_appliance
+from home_rescue.case_store import CaseStore
+from home_rescue.transitions import transition
 
 
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", "media"))
@@ -45,16 +49,17 @@ def _now_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def create_app(store=None, turn_fn=None, plate_fn=None):
-    store = store or CaseStore(os.environ.get("APP_DB", "appliance_fixer.db"))
-    seed_store(store)
+def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
+    store = store or CaseStore(os.environ.get("APP_DB", "home_rescue.db"))
+    if seed:
+        seed_store(store)
     turn_fn = turn_fn or default_turn
     plate_fn = plate_fn or default_plate
 
     app = FastAPI(
-        title="Appliance Fixer API",
+        title="HomeRescue API",
         version="0.1.0",
-        description="Stub REST and SSE contract for the Appliance Fixer client.",
+        description="Stub REST and SSE contract for the HomeRescue client.",
     )
     app.add_middleware(
         CORSMiddleware,
@@ -89,10 +94,11 @@ def create_app(store=None, turn_fn=None, plate_fn=None):
     @app.post("/api/issues", response_model=CreateIssueResponse)
     def create_issue(payload: CreateIssueRequest = Body(...)) -> CreateIssueResponse:
         case_id = _new_id()
+        appliance = payload.appliance or infer_appliance(payload.symptom)
         store.new_case(
             case_id,
             payload.user_id or "user-default",
-            appliance=payload.appliance,
+            appliance=appliance,
             brand=payload.brand,
             model_number=payload.model_number,
             status="intake",
@@ -100,6 +106,39 @@ def create_app(store=None, turn_fn=None, plate_fn=None):
             error_code=payload.error_code,
         )
         return CreateIssueResponse(case_id=case_id)
+
+    @app.post("/api/issues/{case_id}", response_model=IssueDetail)
+    def update_issue(
+        case_id: str,
+        payload: UpdateIssueRequest = Body(...),
+    ) -> IssueDetail:
+        case = _load(case_id)
+        updates = {}
+        if payload.symptom_text is not None:
+            updates["symptom_text"] = payload.symptom_text
+        if payload.appliance is not None:
+            updates["appliance"] = payload.appliance
+        if payload.brand is not None:
+            updates["brand"] = payload.brand
+        if payload.model_number is not None:
+            updates["model_number"] = payload.model_number
+        if payload.error_code is not None:
+            updates["error_code"] = payload.error_code
+        if payload.messages:
+            existing = list((case.get("data") or {}).get("messages") or [])
+            for m in payload.messages:
+                existing.append({"role": m.role, "text": m.text, "ts": m.ts or _now_iso(),
+                                 "media_ref": getattr(m, "media_ref", None)})
+            updates["messages"] = existing
+        if updates:
+            store.save_case(case_id, **updates)
+        return case_to_detail(_load(case_id))
+
+    @app.delete("/api/issues/{case_id}", response_model=DeleteIssueResponse)
+    def delete_issue(case_id: str) -> DeleteIssueResponse:
+        _load(case_id)  # 404 if the case does not exist
+        store.delete_case(case_id)
+        return DeleteIssueResponse(case_id=case_id, deleted=True)
 
     @app.post("/api/issues/{case_id}/media", response_model=MediaResponse)
     def upload_media(
@@ -125,6 +164,19 @@ def create_app(store=None, turn_fn=None, plate_fn=None):
         })
         store.save_case(case_id, media=media)
         return MediaResponse(ref=ref)
+
+    @app.get("/api/issues/{case_id}/media/{ref}")
+    def get_media(case_id: str, ref: str) -> FileResponse:
+        """Serve a previously uploaded media file so the client can render it inline in chat."""
+        case = _load(case_id)
+        media = (case.get("data") or {}).get("media") or []
+        entry = next((m for m in media if m.get("ref") == ref), None)
+        if entry is None:
+            raise HTTPException(status_code=404, detail="Media not found")
+        path = MEDIA_ROOT / case_id / ref
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="Media file missing")
+        return FileResponse(str(path), media_type=entry.get("mime") or "application/octet-stream")
 
     @app.post("/api/issues/{case_id}/plate", response_model=PlateResponse)
     def read_plate(
@@ -152,10 +204,86 @@ def create_app(store=None, turn_fn=None, plate_fn=None):
     ) -> StreamingResponse:
         case = _load(case_id)
         recap = store.recap(case_id)
+        # When the user attaches a photo to a chat turn, hand it to the agent so it can read the
+        # spec plate / assess the symptom in context (mirrors the auto-kickoff /start path).
+        ref = payload.media_ref
+        image_path = str(MEDIA_ROOT / case_id / ref) if ref else None
 
         def generator():
-            for ev in turn_fn(case, recap, payload.text, store=store):
+            parts = []
+            kwargs = {"store": store}
+            if image_path:
+                kwargs["image_path"] = image_path
+            for ev in turn_fn(case, recap, payload.text, **kwargs):
+                if isinstance(ev, dict) and ev.get("type") == "token" and ev.get("text"):
+                    parts.append(ev["text"])
                 yield f"data: {json.dumps(ev)}\n\n"
+            # Persist the turn so the transcript survives reopen (reopen-every-turn invariant).
+            fresh = store.load_case(case_id)
+            if fresh is not None:
+                messages = list((fresh.get("data") or {}).get("messages") or [])
+                messages.append({"role": "user", "text": payload.text, "ts": _now_iso(),
+                                 "media_ref": ref})
+                # Tokens are word-chunked; collapse any boundary whitespace into single spaces.
+                reply = " ".join(" ".join(parts).split())
+                if reply:
+                    messages.append({"role": "agent", "text": reply, "ts": _now_iso()})
+                store.save_case(case_id, messages=messages)
+
+        return StreamingResponse(
+            generator(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
+    @app.post("/api/issues/{case_id}/start")
+    def start_issue(case_id: str) -> StreamingResponse:
+        """Auto-kickoff: run ONE agent turn so Gemini produces the first fix for a freshly created
+        case, instead of waiting for the user to type. One-shot and idempotent: only an `intake`
+        case with a symptom is eligible, and the turn moves it out of `intake` so it never re-fires.
+        """
+        case = _load(case_id)
+        data = case.get("data") or {}
+        symptom = data.get("symptom_text") or ""
+        eligible = case["status"] == "intake" and bool(symptom.strip())
+        # Resolve an image to hand the agent on its first turn so Gemini can judge it in context
+        # (spec plate vs symptom photo). Prefer one attached to a user message; else the latest media.
+        msgs = data.get("messages") or []
+        ref = next((m.get("media_ref") for m in reversed(msgs) if m.get("media_ref")), None)
+        if ref is None:
+            media = data.get("media") or []
+            ref = media[-1]["ref"] if media else None
+        image_path = str(MEDIA_ROOT / case_id / ref) if ref else None
+
+        def generator():
+            if not eligible:
+                yield f'data: {json.dumps({"type": "done", "status": case["status"]})}\n\n'
+                return
+            parts = []
+            kwargs = {"store": store}
+            if image_path:
+                kwargs["image_path"] = image_path
+            for ev in turn_fn(case, store.recap(case_id), symptom, **kwargs):
+                if isinstance(ev, dict) and ev.get("type") == "token" and ev.get("text"):
+                    parts.append(ev["text"])
+                yield f"data: {json.dumps(ev)}\n\n"
+            fresh = store.load_case(case_id)
+            if fresh is not None:
+                messages = list((fresh.get("data") or {}).get("messages") or [])
+                # The symptom is already in the transcript (intake), so append only Gemini's reply.
+                reply = " ".join(" ".join(parts).split())
+                if reply:
+                    messages.append({"role": "agent", "text": reply, "ts": _now_iso()})
+                # Leave 'intake' so the kickoff fires exactly once (durable one-shot marker).
+                try:
+                    new_status = (
+                        transition(fresh, "start_diagnosis")
+                        if fresh["status"] == "intake"
+                        else fresh["status"]
+                    )
+                except ValueError:
+                    new_status = fresh["status"]
+                store.save_case(case_id, messages=messages, status=new_status)
 
         return StreamingResponse(
             generator(),
@@ -172,6 +300,10 @@ def create_app(store=None, turn_fn=None, plate_fn=None):
             inspection_guide=[
                 InspectionShot(**{k: s[k] for k in ("shot_no", "what_to_film", "where", "narration")})
                 for s in escalation["inspection_guide"]
+            ],
+            escalation_steps=[
+                EscalationStep(**{k: s.get(k) for k in ("order", "instruction", "kind", "wait_hours")})
+                for s in escalation.get("escalation_steps") or []
             ],
             packet=Packet(**{k: escalation["packet"].get(k) for k in (
                 "summary", "model", "error_code", "steps_tried", "video_ref",

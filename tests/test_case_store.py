@@ -1,7 +1,7 @@
 import pytest
 
-from appliance_fixer.case_store import CaseStore
-from appliance_fixer.transitions import transition
+from home_rescue.case_store import CaseStore
+from home_rescue.transitions import transition
 
 
 def test_json_round_trip(tmp_path):

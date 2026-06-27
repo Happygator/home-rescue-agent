@@ -30,8 +30,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
   late final ApiClient _api = widget.client ?? ApiClient();
   IssueDetail? _detail;
   Escalation? _escalation;
-  int _captured = 0;
-  int _total = 0;
+  final Set<int> _doneOrders = {};
   bool _loading = true;
   String? _error;
   bool _draftExpanded = false;
@@ -62,17 +61,10 @@ class _EscalationScreenState extends State<EscalationScreen> {
         detail = await _api.getIssue(widget.caseId);
       }
       final escalation = detail.escalation;
-      final packet = escalation?.packet;
-      final guideTotal = escalation?.inspectionGuide.length ?? 0;
-      final total = packet == null || packet.shotsTotal == 0
-          ? guideTotal
-          : packet.shotsTotal;
       if (!mounted) return;
       setState(() {
         _detail = detail;
         _escalation = escalation;
-        _captured = packet?.shotsCaptured ?? 0;
-        _total = total;
         _loading = false;
         _error = escalation == null ? 'Escalation packet was not available.' : null;
       });
@@ -85,11 +77,13 @@ class _EscalationScreenState extends State<EscalationScreen> {
     }
   }
 
-  InspectionShot? get _currentShot {
-    final guide = _escalation?.inspectionGuide;
-    if (guide == null || _captured >= guide.length) return null;
-    return guide[_captured];
-  }
+  List<EscalationStep> get _steps => _escalation?.escalationSteps ?? const [];
+
+  int get _total => _steps.length;
+
+  int get _done => _doneOrders.length;
+
+  bool get _complete => _total > 0 && _done >= _total;
 
   Packet? get _packet => _escalation?.packet;
 
@@ -101,11 +95,9 @@ class _EscalationScreenState extends State<EscalationScreen> {
 
   String get _caseId => _detail?.caseId ?? widget.caseId;
 
-  bool get _complete => _total == 0 || _captured >= _total;
-
-  void _capture() {
+  void _toggleStep(int order) {
     setState(() {
-      if (_captured < _total) _captured++;
+      if (!_doneOrders.remove(order)) _doneOrders.add(order);
     });
   }
 
@@ -115,7 +107,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
     if (escalation == null || packet == null) return;
     final shareText =
         '${escalation.draftedEmail}\n\n--\nService packet: model $_model, '
-        '${packet.stepsTried} steps tried, $_total inspection shots.';
+        '${packet.stepsTried} steps tried, $_total escalation step(s).';
 
     try {
       if (widget.onShare != null) {
@@ -198,7 +190,6 @@ class _EscalationScreenState extends State<EscalationScreen> {
       return const SizedBox.shrink();
     }
 
-    final shot = _currentShot;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -208,8 +199,8 @@ class _EscalationScreenState extends State<EscalationScreen> {
         const SizedBox(height: 14),
         _packetContentsCard(detail, escalation.packet!),
         const SizedBox(height: 14),
-        if (!_complete && shot != null) ...[
-          _guidedVideoCard(shot),
+        if (_steps.isNotEmpty) ...[
+          _escalationStepsCard(),
           const SizedBox(height: 14),
         ],
         _primaryButton(),
@@ -217,7 +208,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
         _secondaryButton(),
         const SizedBox(height: 8),
         Text(
-          'Call or email ${String.fromCharCode(0x2014)} reach out now, or finish the packet first.',
+          'Call or email ${String.fromCharCode(0x2014)} reach out now, or finish the steps first.',
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 10.5, color: AppColors.textFaint),
         ),
@@ -263,8 +254,8 @@ class _EscalationScreenState extends State<EscalationScreen> {
   }
 
   Widget _progressBanner() {
-    final remaining = (_total - _captured).clamp(0, _total);
-    final value = _total == 0 ? 1.0 : (_captured / _total).clamp(0.0, 1.0);
+    final remaining = (_total - _done).clamp(0, _total);
+    final value = _total == 0 ? 1.0 : (_done / _total).clamp(0.0, 1.0);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -276,7 +267,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _complete ? 'Packet ready to share.' : 'Preparing your packet...',
+            _complete ? 'Steps complete.' : 'Before a technician visit...',
             style: const TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
@@ -296,8 +287,8 @@ class _EscalationScreenState extends State<EscalationScreen> {
           const SizedBox(height: 10),
           Text(
             _complete
-                ? 'All shots captured ${String.fromCharCode(0x2014)} review and share.'
-                : 'Almost there ${String.fromCharCode(0x2014)} $remaining guided inspection shot(s) to go.',
+                ? 'All steps done ${String.fromCharCode(0x2014)} share the packet or contact support.'
+                : 'Work through $remaining escalation step(s) below, then share.',
             style: const TextStyle(
               fontSize: 10.5,
               color: AppColors.nextStripText,
@@ -347,8 +338,8 @@ class _EscalationScreenState extends State<EscalationScreen> {
           const SizedBox(height: 10),
           _contentRow(
             _complete ? _checkMark() : _pendingDot(),
-            'Inspection video',
-            _complete ? '$_total of $_total shots' : '$_captured of $_total shots',
+            'Escalation steps',
+            '$_done of $_total done',
             valueColor: _complete ? AppColors.stepDone : const Color(0xFFB45309),
             strong: true,
           ),
@@ -400,8 +391,13 @@ class _EscalationScreenState extends State<EscalationScreen> {
     );
   }
 
-  Widget _guidedVideoCard(InspectionShot shot) {
+  Widget _escalationStepsCard() {
     final middot = String.fromCharCode(0x00B7);
+    final rows = <Widget>[];
+    for (var i = 0; i < _steps.length; i++) {
+      if (i > 0) rows.add(const SizedBox(height: 12));
+      rows.add(_stepRow(_steps[i]));
+    }
     return _card(
       borderColor: const Color(0xFFBFDBFE),
       child: Column(
@@ -410,7 +406,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
           Row(
             children: [
               Text(
-                'NOW $middot GUIDED VIDEO',
+                'NOW $middot ESCALATION STEPS',
                 style: const TextStyle(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,
@@ -419,7 +415,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
               ),
               const Spacer(),
               Text(
-                'Shot ${_captured + 1} of $_total',
+                '$_done of $_total',
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -429,68 +425,76 @@ class _EscalationScreenState extends State<EscalationScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            height: 120,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.headerTop,
-              borderRadius: BorderRadius.circular(10),
+          ...rows,
+        ],
+      ),
+    );
+  }
+
+  Widget _stepRow(EscalationStep step) {
+    final done = _doneOrders.contains(step.order);
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => _toggleStep(step.order),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 22,
+              height: 22,
+              child: Center(child: done ? _checkMark() : _emptyRing()),
             ),
-            child: Stack(
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEF4444),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'REC 0:00',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 9.5,
-                      ),
-                    ),
-                  ],
-                ),
-                Center(
-                  child: Container(
-                    width: 150,
-                    height: 76,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.24),
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Text(
-                      shot.whatToFilm,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.85),
-                        fontSize: 11,
-                      ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    step.instruction,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      height: 1.35,
+                      color: done ? AppColors.textFaint : AppColors.textBody,
+                      decoration:
+                          done ? TextDecoration.lineThrough : TextDecoration.none,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 5),
+                  _kindChip(step.kind),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            shot.narration,
-            style: const TextStyle(fontSize: 11, color: AppColors.textBody),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _kindChip(String kind) {
+    const labels = {
+      'check': 'CHECK',
+      'action': 'DO',
+      'wait': 'WAIT',
+      'call': 'CALL',
+    };
+    final label = labels[kind] ?? kind.toUpperCase();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.nextStripBg,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFBFDBFE)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 8.5,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
+          color: AppColors.primary,
+        ),
       ),
     );
   }
@@ -500,7 +504,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: _complete ? _share : _capture,
+        onPressed: _share,
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: AppColors.primary,
@@ -510,7 +514,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
-        child: Text(_complete ? 'Share service packet' : 'Capture this shot'),
+        child: const Text('Share service packet'),
       ),
     );
   }
@@ -617,7 +621,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
   }
 
   Widget _checkMark() {
-    return const Icon(Icons.check, color: AppColors.stepDone, size: 20);
+    return const Icon(Icons.check_circle, color: AppColors.stepDone, size: 20);
   }
 
   Widget _pendingDot() {

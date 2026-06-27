@@ -1,0 +1,373 @@
+{
+  "escalation": {
+    "appliance": "dishwasher",
+    "brand": "LG",
+    "error_code": null,
+    "model": "LDFC2423V",
+    "source": "default",
+    "steps": [
+      {
+        "instruction": "Check that the appliance is plugged in and the outlet has power.",
+        "kind": "check",
+        "order": 1
+      },
+      {
+        "instruction": "Find the model and serial number on the spec plate and have them ready.",
+        "kind": "check",
+        "order": 2
+      },
+      {
+        "instruction": "Note the symptom and any error code shown on the display.",
+        "kind": "action",
+        "order": 3
+      },
+      {
+        "instruction": "Call support to schedule a technician if the issue still is not resolved.",
+        "kind": "call",
+        "order": 4
+      }
+    ],
+    "symptom": null
+  },
+  "manual": {
+    "appliance": "dishwasher",
+    "brand": "LG",
+    "error_code_url": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+    "found": true,
+    "manual_url": "https://www.lg.com/us/support/product-help/LDFC2423V.APZEEUS",
+    "model": "LDFC2423V",
+    "pages": {},
+    "product_line": "LG Front-Control Dishwasher w/ QuadWash (LDFC2423V.APZEEUS)",
+    "recalls": [],
+    "warranty_status": "1 yr parts/labor; 10 yr direct-drive motor (verify per unit)."
+  },
+  "workflows": {
+    "AE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": true,
+      "error_code": "AE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/ae-e1-error-code-dish-washer--20150140935066",
+          "instruction": "Confirm the unit is level (water pools to one side if not).",
+          "order": 1,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/ae-e1-error-code-dish-washer--20150140935066",
+          "instruction": "Clean the door gasket; inspect for damage; clear/inspect the spray arms.",
+          "order": 2,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/ae-e1-error-code-dish-washer--20150140935066",
+          "instruction": "Use only dishwasher detergent, correct amount (excess suds can trip the float).",
+          "order": 3,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/ae-e1-error-code-dish-washer--20150140935066",
+          "instruction": "Turn the breaker OFF, remove the kick plate, dry the drain pan, allow 24-48h to evaporate, then reset. If the leak recurs, book service.",
+          "order": 4,
+          "safe": false,
+          "source": "error_code"
+        }
+      ]
+    },
+    "CE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": true,
+      "error_code": "CE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Power OFF, breaker OFF 10 s, restore power, restart once.",
+          "order": 1,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "If CE returns, book service (motor/control).",
+          "order": 2,
+          "safe": false,
+          "source": "error_code"
+        }
+      ]
+    },
+    "CL": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": false,
+      "error_code": "CL",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Open the door, press POWER, select a cycle, then hold RINSE and SPRAY together for 3 seconds to turn Control Lock off.",
+          "order": 1,
+          "safe": true,
+          "source": "error_code"
+        }
+      ]
+    },
+    "E1": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": true,
+      "error_code": "E1",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/ae-e1-error-code-dish-washer--20150140935066",
+          "instruction": "Follow the AE steps: level, gasket/spray-arm check, correct detergent, dry the drain pan 24-48h, then reset. If it recurs, book service.",
+          "order": 1,
+          "safe": false,
+          "source": "error_code"
+        }
+      ]
+    },
+    "FE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": true,
+      "error_code": "FE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Power OFF, switch the circuit breaker OFF for 10 seconds, restore power, restart.",
+          "order": 1,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "If FE returns, the inlet valve is likely stuck open - book service.",
+          "order": 2,
+          "safe": false,
+          "source": "error_code"
+        }
+      ]
+    },
+    "HE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": true,
+      "error_code": "HE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Power OFF, breaker OFF 10 s, restore power, restart once - do NOT open the heater circuit.",
+          "order": 1,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "If HE returns, book service (heating element - not a DIY repair).",
+          "order": 2,
+          "safe": false,
+          "source": "error_code"
+        }
+      ]
+    },
+    "IE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": false,
+      "error_code": "IE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Confirm the water-supply valve under the sink is fully ON.",
+          "order": 1,
+          "safe": true,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Straighten any kinked fill line; confirm house water pressure (20-120 PSI).",
+          "order": 2,
+          "safe": true,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Make sure the drain-hose outlet is 10+ inches above the dishwasher base.",
+          "order": 3,
+          "safe": true,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "In cold weather, check for frozen supply components; level the unit; remove flood-safe hoses if present.",
+          "order": 4,
+          "safe": true,
+          "source": "error_code"
+        }
+      ]
+    },
+    "LE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": true,
+      "error_code": "LE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Power OFF, breaker OFF 10 s, restore power, restart once (a transient glitch can clear).",
+          "order": 1,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "If LE returns, book service (motor/wiring).",
+          "order": 2,
+          "safe": false,
+          "source": "error_code"
+        }
+      ]
+    },
+    "OE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": false,
+      "error_code": "OE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/oe-error-code-dishwasher--20150986144736",
+          "instruction": "Clean the bottom filter / coin trap.",
+          "order": 1,
+          "safe": true,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/oe-error-code-dishwasher--20150986144736",
+          "instruction": "Check the drain hose for kinks or blockages; confirm a tight seal at the connection.",
+          "order": 2,
+          "safe": true,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/oe-error-code-dishwasher--20150986144736",
+          "instruction": "If newly installed, confirm the garbage-disposal knockout plug was removed; clear sink-disposal clogs.",
+          "order": 3,
+          "safe": true,
+          "source": "error_code"
+        }
+      ]
+    },
+    "PF": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": false,
+      "error_code": "PF",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Press any control-panel key to clear PF after power is restored.",
+          "order": 1,
+          "safe": true,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Confirm the unit is on a dedicated grounded 120V/60Hz/15A+ circuit with no extension cord.",
+          "order": 2,
+          "safe": true,
+          "source": "error_code"
+        }
+      ]
+    },
+    "bE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": false,
+      "error_code": "bE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Use ONLY dishwasher detergent (never dish-washing liquid), filled to the line.",
+          "order": 1,
+          "safe": true,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Confirm the dishwasher is level.",
+          "order": 2,
+          "safe": true,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "To clear existing suds, place 4-7 oz of milk in a bowl on the upper rack and run AUTO.",
+          "order": 3,
+          "safe": true,
+          "source": "error_code"
+        }
+      ]
+    },
+    "nE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": true,
+      "error_code": "nE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Disconnect power for a few minutes and retry once.",
+          "order": 1,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "If nE returns, book service (vario motor).",
+          "order": 2,
+          "safe": false,
+          "source": "error_code"
+        }
+      ]
+    },
+    "tE": {
+      "appliance": "dishwasher",
+      "brand": "LG",
+      "dispatch_recommended": true,
+      "error_code": "tE",
+      "model": "LDFC2423V",
+      "steps": [
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "Power OFF, breaker OFF 10 s, restore power, restart once.",
+          "order": 1,
+          "safe": false,
+          "source": "error_code"
+        },
+        {
+          "citation": "https://www.lg.com/us/support/help-library/lg-dishwasher-error-code-list-CT10000009-20150933422943",
+          "instruction": "If tE returns, book service (thermistor/heater).",
+          "order": 2,
+          "safe": false,
+          "source": "error_code"
+        }
+      ]
+    }
+  }
+}

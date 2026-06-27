@@ -124,7 +124,7 @@ def _extract_json(text):
 def _judge_client():
     from google import genai
 
-    from appliance_fixer.tools import load_key
+    from home_rescue.tools import load_key
 
     return genai.Client(api_key=load_key())
 
@@ -173,9 +173,9 @@ async def _collect_adk_reply(row):
     from google.adk.sessions import InMemorySessionService
     from google.genai import types
 
-    from appliance_fixer.agent import root_agent
+    from home_rescue.agent import root_agent
 
-    app_name = "appliance_fixer_eval"
+    app_name = "home_rescue_eval"
     user_id = "eval-user"
     session_id = f"diagnosis-{row.get('id', 'case')}"
     session_service = InMemorySessionService()

@@ -23,14 +23,45 @@
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="appliance_fixer">
+  <meta name="apple-mobile-web-app-title" content="home_rescue">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>appliance_fixer</title>
+  <title>home_rescue</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Splash shown while the Flutter engine downloads and boots, so the user
+       sees a branded spinner instead of a blank white screen. Removed once
+       Flutter paints its first frame (see the flutter-first-frame listener). */
+    #loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F8FAFC;
+      z-index: 9999;
+      transition: opacity 0.25s ease-out;
+    }
+    #loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #loading .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #DBEAFE;
+      border-top-color: #2563EB;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
   <!--
@@ -41,6 +72,16 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <div id="loading"><div class="spinner"></div></div>
+  <script>
+    // Fade out and remove the splash once Flutter renders its first frame.
+    window.addEventListener('flutter-first-frame', function () {
+      var el = document.getElementById('loading');
+      if (!el) return;
+      el.classList.add('hidden');
+      el.addEventListener('transitionend', function () { el.remove(); });
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

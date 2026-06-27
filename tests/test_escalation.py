@@ -1,5 +1,5 @@
-from appliance_fixer.case_store import CaseStore
-from appliance_fixer.escalation import (
+from home_rescue.case_store import CaseStore
+from home_rescue.escalation import (
     MAX_SHOT_SECONDS,
     VIDEO_MIME,
     assemble_packet,
@@ -152,3 +152,50 @@ def test_escalate_case_video_mime_constraint():
     assert VIDEO_MIME == "video/mp4"
     assert isinstance(MAX_SHOT_SECONDS, int)
     assert 0 < MAX_SHOT_SECONDS <= 30
+
+
+def test_packet_and_draft_cite_curated_manual(tmp_path):
+    store = CaseStore(tmp_path / "manual.db")
+    cid = "case-manual"
+    store.new_case(
+        cid,
+        "user-1",
+        appliance="refrigerator",
+        brand="Samsung",
+        model_number="RF28T5001SR",
+        status="diagnosing",
+        symptom_text="Fresh food section is warm.",
+        error_code=None,
+    )
+    case = store.load_case(cid)
+
+    guide = generate_inspection_guide(case)
+    packet = assemble_packet(case, guide)
+    assert packet["manual"] is not None
+    assert "manualslib.com" in packet["manual"]["manual_url"]
+    assert packet["manual"]["error_code_page"] == 65
+    assert packet["warranty_status"] != "checking..."
+
+    draft = generate_escalation_draft(case)
+    assert "manualslib.com" in draft["body"]
+
+
+def test_packet_manual_none_for_uncurated_model(tmp_path):
+    store = CaseStore(tmp_path / "uncurated.db")
+    cid = "case-uncurated"
+    store.new_case(
+        cid,
+        "user-1",
+        appliance="refrigerator",
+        brand="Samsung",
+        model_number="RF28R7201",
+        status="diagnosing",
+        symptom_text="Fresh food section is warm.",
+        error_code=None,
+    )
+    case = store.load_case(cid)
+
+    packet = assemble_packet(case, generate_inspection_guide(case))
+    assert packet["manual"] is None
+    assert packet["warranty_status"] == "checking..."
+    assert "Manufacturer manual:" not in generate_escalation_draft(case)["body"]

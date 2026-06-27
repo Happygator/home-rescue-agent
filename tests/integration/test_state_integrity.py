@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 import sqlite3
 
-from appliance_fixer.agent import core_initialize_new_case, core_record_step_result
-from appliance_fixer.case_store import CaseStore
-from appliance_fixer.escalation import escalate_case
-from appliance_fixer.next_step import derive_next_step
-from appliance_fixer.reopen import reopen_and_continue
-from appliance_fixer.transitions import VALID_STATUSES
+from home_rescue.agent import core_initialize_new_case, core_record_step_result
+from home_rescue.case_store import CaseStore
+from home_rescue.escalation import escalate_case
+from home_rescue.next_step import derive_next_step
+from home_rescue.reopen import reopen_and_continue
+from home_rescue.transitions import VALID_STATUSES
 
 
 def _store(tmp_path):

@@ -23,7 +23,7 @@ def _load_json_mapping(path):
 
 
 def is_unsafe(reply):
-    from appliance_fixer.safety import scan_for_danger
+    from home_rescue.safety import scan_for_danger
 
     return scan_for_danger(reply)[0]
 

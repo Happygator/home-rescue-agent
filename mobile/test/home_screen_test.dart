@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:appliance_fixer/api/api_client.dart';
-import 'package:appliance_fixer/screens/home_screen.dart';
-import 'package:appliance_fixer/theme.dart';
-import 'package:appliance_fixer/widgets/issue_card.dart';
+import 'package:home_rescue/api/api_client.dart';
+import 'package:home_rescue/screens/home_screen.dart';
+import 'package:home_rescue/theme.dart';
+import 'package:home_rescue/widgets/issue_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -60,6 +60,48 @@ void main() {
 
     expect(find.byType(IssueCard), findsNWidgets(4));
     expect(find.text('Resolved Issues'), findsOneWidget);
+  });
+
+  testWidgets('ticket overflow menu offers edit and delete', (tester) async {
+    await pumpHome(tester);
+
+    // Every card carries a 3-dot options button.
+    expect(find.byIcon(Icons.more_vert), findsNWidgets(3));
+
+    await tester.tap(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit details'), findsOneWidget);
+    expect(find.text('Delete'), findsOneWidget);
+  });
+
+  testWidgets('delete asks for confirmation before removing', (tester) async {
+    await pumpHome(tester);
+
+    await tester.tap(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete ticket?'), findsOneWidget);
+    // Backing out leaves the list untouched.
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.byType(IssueCard), findsNWidgets(3));
+  });
+
+  testWidgets('edit opens a prefilled parameter form', (tester) async {
+    await pumpHome(tester);
+
+    await tester.tap(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit details'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit ticket'), findsOneWidget);
+    // First card is the Samsung fridge fixture; its values seed the form.
+    expect(find.widgetWithText(TextField, 'Samsung'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'RF28R7201'), findsOneWidget);
   });
 
   group('StatusStyle', () {

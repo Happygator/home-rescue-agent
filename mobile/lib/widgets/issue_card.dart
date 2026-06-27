@@ -8,7 +8,11 @@ import 'next_strip.dart';
 class IssueCard extends StatelessWidget {
   final IssueSummary issue;
   final VoidCallback? onTap;
-  const IssueCard({super.key, required this.issue, this.onTap});
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  const IssueCard({super.key, required this.issue, this.onTap, this.onEdit, this.onDelete});
+
+  static const Color _danger = Color(0xFFB91C1C);
 
   @override
   Widget build(BuildContext context) {
@@ -29,47 +33,93 @@ class IssueCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Container(width: 4, decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(2))),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                top: 14,
+                bottom: 14,
+                width: 4,
+                child: DecoratedBox(decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(2))),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 14, 6, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Expanded(child: Text(issue.displayTitle, maxLines: 1, overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, color: AppColors.textTitle))),
-                            const SizedBox(width: 8),
-                            StatusBadge(status: issue.status),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(meta, style: const TextStyle(fontSize: 11.5, color: AppColors.textFaint)),
-                        const SizedBox(height: 10),
-                        Text(issue.symptom, maxLines: 1, overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12.5, color: AppColors.textBody)),
-                        if (issue.nextStep.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          NextStrip(text: issue.nextStep, escalated: issue.status == 'escalated'),
-                        ],
+                        Expanded(child: Text(issue.displayTitle, maxLines: 1, overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, color: AppColors.textTitle))),
+                        const SizedBox(width: 8),
+                        StatusBadge(status: issue.status),
+                        if (onEdit != null || onDelete != null) _menu(),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Text(meta, style: const TextStyle(fontSize: 11.5, color: AppColors.textFaint)),
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Text(issue.symptom, maxLines: 1, overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12.5, color: AppColors.textBody)),
+                    ),
+                    if (issue.nextStep.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: NextStrip(text: issue.nextStep, escalated: issue.status == 'escalated'),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _menu() {
+    return PopupMenuButton<String>(
+      tooltip: 'Ticket options',
+      icon: const Icon(Icons.more_vert, size: 20, color: AppColors.textFaint),
+      padding: EdgeInsets.zero,
+      splashRadius: 20,
+      position: PopupMenuPosition.under,
+      onSelected: (value) {
+        if (value == 'edit') onEdit?.call();
+        if (value == 'delete') onDelete?.call();
+      },
+      itemBuilder: (context) => [
+        if (onEdit != null)
+          const PopupMenuItem<String>(
+            value: 'edit',
+            child: Row(
+              children: [
+                Icon(Icons.edit_outlined, size: 18, color: AppColors.textBody),
+                SizedBox(width: 10),
+                Text('Edit details'),
+              ],
+            ),
+          ),
+        if (onDelete != null)
+          const PopupMenuItem<String>(
+            value: 'delete',
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline, size: 18, color: _danger),
+                SizedBox(width: 10),
+                Text('Delete', style: TextStyle(color: _danger)),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

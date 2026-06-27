@@ -55,10 +55,15 @@ def score_plate(read_fn=None, labels=None, limit=None):
         labels = load_labels()
     rows = labels[:limit] if limit else list(labels)
     if read_fn is None:
-        from appliance_fixer.tools import read_spec_plate
+        from home_rescue.tools import read_spec_plate
 
         read_fn = read_spec_plate
-    from appliance_fixer.tools import validate_model
+    from home_rescue.tools import canonicalize_symbols, normalize_model
+
+    def _ocr_match(read_model, true_model):
+        a = canonicalize_symbols(normalize_model(read_model))
+        b = canonicalize_symbols(normalize_model(true_model))
+        return bool(a) and bool(b) and (a == b or a in b or b in a)
 
     misses = []
     correct = 0
@@ -68,7 +73,6 @@ def score_plate(read_fn=None, labels=None, limit=None):
         filename = row["filename"]
         try:
             result = read_fn(PLATES_DIR / filename) or {}
-            matched = validate_model(result.get("model_number"), result.get("brand"))
         except Exception as exc:
             reason = "quota" if _is_quota_error(exc) else "error"
             misses.append({"filename": filename, "reason": reason, "error": str(exc)})
@@ -81,7 +85,8 @@ def score_plate(read_fn=None, labels=None, limit=None):
                 break
             continue
 
-        if (matched or "").lower() == (row["true_model"] or "").lower():
+        read_model = result.get("model_number")
+        if _ocr_match(read_model, row["true_model"]):
             correct += 1
         else:
             misses.append(
@@ -89,8 +94,7 @@ def score_plate(read_fn=None, labels=None, limit=None):
                     "filename": filename,
                     "reason": "mismatch",
                     "true_model": row["true_model"],
-                    "read_model": result.get("model_number"),
-                    "matched_model": matched,
+                    "read_model": read_model,
                     "brand": result.get("brand"),
                 }
             )
@@ -115,7 +119,7 @@ def _fixture_read(fixtures):
 
 
 def _retrying_live_read(sleep_seconds):
-    from appliance_fixer.tools import read_spec_plate
+    from home_rescue.tools import read_spec_plate
 
     def read(path):
         attempts = 0

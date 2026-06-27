@@ -1,1 +1,1 @@
-"""Appliance Fixer REST API package."""
+"""HomeRescue REST API package."""

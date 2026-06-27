@@ -8,7 +8,7 @@ __pycache__/
 /out-tsc
 /bazel-out
 
-# Appliance Fixer: local build artifacts
+# HomeRescue: local build artifacts
 .pytest_tmp/
 .pytest*tmp*/
 .pytest_cache/
@@ -230,3 +230,36 @@ CLAUDE.md
 
 # pytest temp redirect (see conftest.py)
 .tmp_pytest/
+
+# ---------------------------------------------------------------------------
+# Non-essential local tooling, caches, and build artifacts
+# ---------------------------------------------------------------------------
+
+# Every folder starting with a period (local tooling / caches / venvs), at any
+# depth. .git is handled by git itself; keep .gitignore/.gitattributes tracked.
+.*/
+!.gitignore
+!.gitattributes
+
+# Explicit top-level dot-folders present in this repo (kept for clarity)
+.claude/
+.gstack/
+.venv/
+.pytest_cache/
+.pytest_tmp/
+.pytest_reopen_tmp/
+
+# Editor / OS / agent scratch
+__pycache__/
+artifacts/
+CODEX_TASK_*.md
+CLAUDE.md
+GEMINI_KEY.txt
+*.db
+media/
+
+# Flutter / Dart build output
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies

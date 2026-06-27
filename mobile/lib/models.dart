@@ -1,3 +1,21 @@
+class ChatTurn {
+  final String role; // 'user' | 'agent' | 'safety'
+  final String text;
+  final String? ts;
+  final String? mediaRef; // optional image attached to this turn
+
+  ChatTurn({required this.role, required this.text, this.ts, this.mediaRef});
+
+  factory ChatTurn.fromJson(Map<String, dynamic> j) => ChatTurn(
+        role: j['role'] as String? ?? 'agent',
+        text: j['text'] as String? ?? '',
+        ts: j['ts'] as String?,
+        mediaRef: j['media_ref'] as String?,
+      );
+
+  Map<String, dynamic> toJson() => {'role': role, 'text': text, 'ts': ts, 'media_ref': mediaRef};
+}
+
 class Diagnosis {
   final String hypothesis;
   final String confidence;
@@ -77,6 +95,34 @@ class InspectionShot {
       );
 }
 
+class EscalationStep {
+  final int order;
+  final String instruction;
+  final String kind;
+  final int? waitHours;
+
+  EscalationStep({
+    required this.order,
+    required this.instruction,
+    required this.kind,
+    this.waitHours,
+  });
+
+  factory EscalationStep.fromJson(Map<String, dynamic> j) => EscalationStep(
+        order: j['order'] as int,
+        instruction: j['instruction'] as String,
+        kind: j['kind'] as String? ?? 'action',
+        waitHours: j['wait_hours'] as int?,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'order': order,
+        'instruction': instruction,
+        'kind': kind,
+        'wait_hours': waitHours,
+      };
+}
+
 class Packet {
   final String summary;
   final String? model;
@@ -114,6 +160,7 @@ class Escalation {
   final String recipient;
   final String draftedEmail;
   final List<InspectionShot> inspectionGuide;
+  final List<EscalationStep> escalationSteps;
   final Packet? packet;
   final bool sent;
 
@@ -121,6 +168,7 @@ class Escalation {
     required this.recipient,
     required this.draftedEmail,
     required this.inspectionGuide,
+    required this.escalationSteps,
     this.packet,
     required this.sent,
   });
@@ -130,6 +178,9 @@ class Escalation {
         draftedEmail: j['drafted_email'] as String,
         inspectionGuide: (j['inspection_guide'] as List)
             .map((e) => InspectionShot.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        escalationSteps: ((j['escalation_steps'] as List?) ?? const [])
+            .map((e) => EscalationStep.fromJson(e as Map<String, dynamic>))
             .toList(),
         packet: j['packet'] == null
             ? null
@@ -201,6 +252,7 @@ class IssueDetail {
   final List<Step> steps;
   final String nextStep;
   final List<MediaRef> media;
+  final List<ChatTurn> messages;
   final Escalation? escalation;
   final String createdAt;
   final String updatedAt;
@@ -218,6 +270,7 @@ class IssueDetail {
     required this.steps,
     required this.nextStep,
     required this.media,
+    this.messages = const [],
     this.escalation,
     required this.createdAt,
     required this.updatedAt,
@@ -241,6 +294,9 @@ class IssueDetail {
         nextStep: j['next_step'] as String,
         media: (j['media'] as List)
             .map((e) => MediaRef.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        messages: ((j['messages'] as List?) ?? const [])
+            .map((e) => ChatTurn.fromJson(e as Map<String, dynamic>))
             .toList(),
         escalation: j['escalation'] == null
             ? null
@@ -283,6 +339,7 @@ class IssueDetail {
                   'taken_at': e.takenAt,
                 })
             .toList(),
+        'messages': messages.map((e) => e.toJson()).toList(),
         'escalation': escalation == null
             ? null
             : {
@@ -296,6 +353,8 @@ class IssueDetail {
                           'narration': e.narration,
                         })
                     .toList(),
+                'escalation_steps':
+                    escalation!.escalationSteps.map((e) => e.toJson()).toList(),
                 'packet': escalation!.packet == null
                     ? null
                     : {

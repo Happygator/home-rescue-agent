@@ -1,5 +1,5 @@
-from appliance_fixer.case_store import CaseStore
-from appliance_fixer.tools import read_and_cache_plate, read_spec_plate, validate_model
+from home_rescue.case_store import CaseStore
+from home_rescue.tools import read_and_cache_plate, read_spec_plate, validate_model
 
 
 class _FakeResp:

@@ -1,0 +1,42 @@
+{
+  "user_plate_01_samsung_fridge.jpg": {
+    "brand": "SAMSUNG",
+    "error_code": null,
+    "model_number": "RF28T5001SR/AA"
+  },
+  "user_plate_02_compact_fridge.jpg": {
+    "brand": null,
+    "error_code": null,
+    "model_number": "BC-70-62H-US(E)"
+  },
+  "user_plate_03_trane_hvac.jpg": {
+    "brand": "TRANE",
+    "error_code": null,
+    "model_number": "4TTR6048J1000AA"
+  },
+  "user_plate_04_whirlpool_fridge.jpg": {
+    "brand": "Whirlpool",
+    "error_code": null,
+    "model_number": "WRFF3336SZ 00"
+  },
+  "user_plate_05_whirlpool_fridge.jpg": {
+    "brand": "Whirlpool",
+    "error_code": null,
+    "model_number": "WRFF3336SZ 00"
+  },
+  "user_plate_06_lg_dishwasher.jpg": {
+    "brand": "LG",
+    "error_code": null,
+    "model_number": "LDFC2423V"
+  },
+  "user_plate_07_whirlpool_dryer.jpg": {
+    "brand": "Whirlpool",
+    "error_code": null,
+    "model_number": "WGD95HEDWO"
+  },
+  "user_plate_08_whirlpool_washer.jpg": {
+    "brand": "Whirlpool",
+    "error_code": null,
+    "model_number": "WFW95HEDWO"
+  }
+}

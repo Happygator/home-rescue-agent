@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 
 from app.seed_data import build_seed
-from appliance_fixer.case_store import CaseStore
+from home_rescue.case_store import CaseStore
 
 
 def _detail_to_case(store: CaseStore, d) -> None:
@@ -21,6 +21,8 @@ def _detail_to_case(store: CaseStore, d) -> None:
             "recipient": e.recipient, "drafted_email": e.drafted_email,
             "inspection_guide": [{"shot_no": s.shot_no, "what_to_film": s.what_to_film,
                                   "where": s.where, "narration": s.narration} for s in e.inspection_guide],
+            "escalation_steps": [{"order": s.order, "instruction": s.instruction,
+                                  "kind": s.kind, "wait_hours": s.wait_hours} for s in e.escalation_steps],
             "packet": (e.packet.model_dump() if e.packet else None),
             "sent": e.sent,
         }

@@ -5,6 +5,7 @@ import datetime
 from app.models import (
     Diagnosis,
     Escalation,
+    EscalationStep,
     InspectionShot,
     IssueDetail,
     MediaRef,
@@ -167,6 +168,12 @@ def build_seed() -> dict[str, IssueDetail]:
                     where="Standing at the fridge",
                     narration="Say what is wrong and what you already tried.",
                 ),
+            ],
+            escalation_steps=[
+                EscalationStep(order=1, instruction="Check that the appliance is plugged in and the outlet has power.", kind="check"),
+                EscalationStep(order=2, instruction="Find the model and serial number on the spec plate and have them ready.", kind="check"),
+                EscalationStep(order=3, instruction="Note the symptom and any error code shown on the display.", kind="action"),
+                EscalationStep(order=4, instruction="Call support to schedule a technician if the issue still is not resolved.", kind="call"),
             ],
             packet=Packet(
                 summary=(

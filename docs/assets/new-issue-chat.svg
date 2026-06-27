@@ -23,42 +23,40 @@
   <text x="18" y="82" font-size="24" fill="#FFFFFF">&#8249;</text>
   <text x="40" y="81" fill="#FFFFFF" font-size="16" font-weight="700">New Issue</text>
 
-  <!-- Sub-row: status -->
-  <rect x="16" y="114" width="70" height="22" rx="11" fill="#F1F5F9"/>
-  <circle cx="30" cy="125" r="3" fill="#94A3B8"/>
-  <text x="40" y="129" font-size="11" font-weight="700" fill="#475569">INTAKE</text>
-  <text x="96" y="130" font-size="12" fill="#94A3B8">Gathering appliance details&#8230;</text>
+  <!-- Title -->
+  <text x="16" y="142" font-size="18" font-weight="700" fill="#0F172A">What&#8217;s going on with your appliance?</text>
 
-  <!-- Case summary (empty) -->
-  <rect x="16" y="148" width="358" height="150" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
-  <text x="30" y="172" font-size="13" font-weight="700" fill="#0F172A">Case summary</text>
-  <text x="30" y="198" font-size="12.5" fill="#475569"><tspan font-weight="600">Appliance</tspan> &#8212; <tspan font-style="italic" fill="#94A3B8">not specified yet</tspan></text>
-  <text x="30" y="222" font-size="12.5" fill="#475569"><tspan font-weight="600">Symptom</tspan> &#8212; <tspan font-style="italic" fill="#94A3B8">not described yet</tspan></text>
-  <text x="30" y="246" font-size="12.5" fill="#475569"><tspan font-weight="600">Model</tspan> &#8212; <tspan font-style="italic" fill="#94A3B8">awaiting spec plate</tspan></text>
-  <rect x="30" y="262" width="314" height="24" rx="7" fill="#EFF6FF"/>
-  <text x="42" y="278" font-size="12" fill="#1E40AF"><tspan font-weight="700">Next &#8594;</tspan> Answer below to start diagnosis.</text>
+  <!-- Helper text -->
+  <text x="16" y="168" font-size="13" fill="#64748B">Describe what it&#8217;s doing wrong. Add a photo of the problem</text>
+  <text x="16" y="186" font-size="13" fill="#64748B">or the spec plate if you can &#8212; it helps the assistant</text>
+  <text x="16" y="204" font-size="13" fill="#64748B">diagnose faster.</text>
 
-  <!-- Chat -->
-  <rect x="16" y="314" width="300" height="40" rx="14" fill="#FFFFFF" stroke="#EAEEF3"/>
-  <text x="30" y="338" font-size="12" fill="#334155">Hi! I&#8217;m your Appliance Fixer assistant.</text>
+  <!-- Description field (filled state) -->
+  <rect x="16" y="222" width="358" height="124" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/>
+  <text x="30" y="248" font-size="13.5" fill="#334155">The fridge is running but the fresh-food side is</text>
+  <text x="30" y="270" font-size="13.5" fill="#334155">warm &#8212; freezer&#8217;s still cold. Started a couple</text>
+  <text x="30" y="292" font-size="13.5" fill="#334155">of days ago.</text>
+  <!-- caret -->
+  <rect x="119" y="282" width="1.5" height="14" fill="#2563EB"/>
 
-  <rect x="16" y="362" width="344" height="104" rx="14" fill="#FFFFFF" stroke="#EAEEF3"/>
-  <text x="30" y="384" font-size="12" fill="#334155">Let&#8217;s set up your issue. To start, tell me:</text>
-  <text x="30" y="406" font-size="12" fill="#334155">1) What appliance is it (e.g. refrigerator)?</text>
-  <text x="30" y="428" font-size="12" fill="#334155">2) What&#8217;s it doing wrong?</text>
-  <text x="30" y="450" font-size="12" fill="#334155">3) The model number on the spec plate.</text>
+  <!-- Photo attached row -->
+  <rect x="16" y="364" width="64" height="64" rx="10" fill="#E2E8F0"/>
+  <!-- little appliance/photo glyph inside the thumbnail -->
+  <rect x="28" y="378" width="40" height="36" rx="5" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <circle cx="40" cy="390" r="4" fill="#94A3B8"/>
+  <path d="M30 412 L44 398 L54 408 L60 402 L66 412 Z" fill="#CBD5E1"/>
+  <text x="92" y="392" font-size="13" fill="#334155">Photo attached</text>
+  <text x="92" y="411" font-size="12" fill="#94A3B8">symptom.jpg &#183; will ride along on your first message</text>
+  <text x="358" y="400" font-size="13" font-weight="600" fill="#2563EB" text-anchor="end">Remove</text>
 
-  <rect x="16" y="474" width="324" height="40" rx="14" fill="#FFFFFF" stroke="#EAEEF3"/>
-  <text x="30" y="498" font-size="12" fill="#334155">Or tap &#128247; to scan the plate and auto-fill.</text>
+  <!-- What happens next, inline note -->
+  <rect x="16" y="452" width="358" height="64" rx="12" fill="#EFF6FF"/>
+  <text x="30" y="478" font-size="12" fill="#1E40AF"><tspan font-weight="700">Start diagnosis</tspan> seeds this as your first chat</text>
+  <text x="30" y="496" font-size="12" fill="#1E40AF">message and opens the chat &#8212; the assistant reads</text>
+  <text x="30" y="514" font-size="12" fill="#1E40AF">your photo in context and kicks off the diagnosis.</text>
 
-  <!-- Input bar -->
-  <rect x="16" y="786" width="256" height="44" rx="22" fill="#FFFFFF" stroke="#E2E8F0"/>
-  <text x="32" y="812" font-size="13" fill="#94A3B8">Describe your appliance problem&#8230;</text>
-  <rect x="280" y="786" width="40" height="44" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/>
-  <text x="300" y="814" font-size="16" text-anchor="middle">&#128247;</text>
-  <circle cx="350" cy="808" r="20" fill="#2563EB"/>
-  <text x="350" y="813" font-size="14" fill="#FFFFFF" text-anchor="middle">&#10148;</text>
-
-  <!-- Home indicator -->
-  <rect x="145" y="834" width="100" height="5" rx="2.5" fill="#CBD5E1"/>
+  <!-- Bottom bar -->
+  <line x1="0" y1="784" x2="390" y2="784" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="16" y="796" width="358" height="48" rx="12" fill="#2563EB"/>
+  <text x="195" y="825" font-size="15" font-weight="700" fill="#FFFFFF" text-anchor="middle">Start diagnosis</text>
 </svg>

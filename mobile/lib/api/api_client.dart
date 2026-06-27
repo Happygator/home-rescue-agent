@@ -14,11 +14,13 @@ class PlateResult {
 class EscalateResult {
   final String draftedEmail;
   final List<InspectionShot> inspectionGuide;
+  final List<EscalationStep> escalationSteps;
   final Packet packet;
-  EscalateResult({required this.draftedEmail, required this.inspectionGuide, required this.packet});
+  EscalateResult({required this.draftedEmail, required this.inspectionGuide, required this.escalationSteps, required this.packet});
   factory EscalateResult.fromJson(Map<String, dynamic> j) => EscalateResult(
         draftedEmail: j['drafted_email'] as String,
         inspectionGuide: (j['inspection_guide'] as List).map((e) => InspectionShot.fromJson(e as Map<String, dynamic>)).toList(),
+        escalationSteps: ((j['escalation_steps'] as List?) ?? const []).map((e) => EscalationStep.fromJson(e as Map<String, dynamic>)).toList(),
         packet: Packet.fromJson(j['packet'] as Map<String, dynamic>),
       );
 }
@@ -56,6 +58,9 @@ class ApiClient {
   Future<IssueDetail> getIssue(String caseId) async =>
       IssueDetail.fromJson(_decodeObj(await _client.get(_u('/api/issues/$caseId'))));
 
+  /// Fully-qualified URL for an uploaded media file, for rendering inline (e.g. in a chat bubble).
+  String mediaUrl(String caseId, String ref) => '$baseUrl/api/issues/$caseId/media/$ref';
+
   Future<String> createIssue({String? appliance, String? brand, String? modelNumber, String? symptom, String? errorCode}) async {
     final r = await _client.post(_u('/api/issues'),
         headers: {'Content-Type': 'application/json'},
@@ -67,6 +72,36 @@ class ApiClient {
           if (errorCode != null) 'error_code': errorCode,
         }));
     return _decodeObj(r)['case_id'] as String;
+  }
+
+  /// Patch intake fields after the camera-first case is created. `messages` (each {role, text})
+  /// are appended to the persisted transcript. Returns the updated IssueDetail.
+  Future<IssueDetail> updateIssue(
+    String caseId, {
+    String? symptomText,
+    String? appliance,
+    String? brand,
+    String? modelNumber,
+    String? errorCode,
+    List<Map<String, dynamic>>? messages,
+  }) async {
+    final r = await _client.post(_u('/api/issues/$caseId'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          if (symptomText != null) 'symptom_text': symptomText,
+          if (appliance != null) 'appliance': appliance,
+          if (brand != null) 'brand': brand,
+          if (modelNumber != null) 'model_number': modelNumber,
+          if (errorCode != null) 'error_code': errorCode,
+          if (messages != null) 'messages': messages,
+        }));
+    return IssueDetail.fromJson(_decodeObj(r));
+  }
+
+  /// Permanently delete a case. Throws ApiException on a non-2xx response.
+  Future<void> deleteIssue(String caseId) async {
+    final r = await _client.delete(_u('/api/issues/$caseId'));
+    if (r.statusCode >= 400) throw ApiException(r.statusCode, utf8.decode(r.bodyBytes));
   }
 
   Future<String> uploadMedia(String caseId, List<int> bytes, {required String filename, String kind = 'symptom', String mime = 'application/octet-stream'}) async {
@@ -92,13 +127,26 @@ class ApiClient {
       _decodeObj(await _client.post(_u('/api/issues/$caseId/resolve')))['status'] as String;
 
   /// Stream agent reply tokens over SSE. Yields each SseEvent as it arrives.
-  Stream<SseEvent> streamMessage(String caseId, String text) async* {
+  /// When [mediaRef] is set, the attached photo is handed to the agent for this turn.
+  Stream<SseEvent> streamMessage(String caseId, String text, {String? mediaRef}) {
     final req = http.Request('POST', _u('/api/issues/$caseId/message'))
       ..headers['Content-Type'] = 'application/json'
-      ..body = jsonEncode({'text': text});
+      ..body = jsonEncode({'text': text, if (mediaRef != null) 'media_ref': mediaRef});
+    return _streamSse(req);
+  }
+
+  /// Auto-kickoff: stream the agent's first diagnosis turn for a freshly created case.
+  Stream<SseEvent> streamStart(String caseId) {
+    final req = http.Request('POST', _u('/api/issues/$caseId/start'))
+      ..headers['Content-Type'] = 'application/json'
+      ..body = '{}';
+    return _streamSse(req);
+  }
+
+  Stream<SseEvent> _streamSse(http.Request req) async* {
     final streamed = await _client.send(req);
     if (streamed.statusCode >= 400) {
-      throw ApiException(streamed.statusCode, 'message stream failed');
+      throw ApiException(streamed.statusCode, 'stream failed (${req.url.path})');
     }
     final lines = streamed.stream.transform(utf8.decoder).transform(const LineSplitter());
     await for (final line in lines) {

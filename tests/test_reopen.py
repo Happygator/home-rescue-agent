@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from appliance_fixer.case_store import CaseStore
-from appliance_fixer.reopen import (
+from home_rescue.case_store import CaseStore
+from home_rescue.reopen import (
     CaseNotFoundError,
     CorruptCaseError,
     main,

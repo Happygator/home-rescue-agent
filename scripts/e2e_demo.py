@@ -12,12 +12,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from google.adk.models.llm_response import LlmResponse
 from google.genai import types
 
-from appliance_fixer.agent import core_initialize_new_case, core_record_step_result
-from appliance_fixer.case_store import CaseStore
-from appliance_fixer.escalation import escalate_case
-from appliance_fixer.next_step import derive_next_step
-from appliance_fixer.reopen import reopen_and_continue
-from appliance_fixer.safety import after_model_callback, scan_for_danger
+from home_rescue.agent import core_initialize_new_case, core_record_step_result
+from home_rescue.case_store import CaseStore
+from home_rescue.escalation import escalate_case
+from home_rescue.next_step import derive_next_step
+from home_rescue.reopen import reopen_and_continue
+from home_rescue.safety import after_model_callback, scan_for_danger
 
 
 APPLIANCE = "refrigerator"
@@ -182,7 +182,7 @@ def beat_escalation_and_safety(db_path: Path) -> None:
 def rest_e2e() -> None:
     # ignore_cleanup_errors: on Windows the sqlite db file can still be briefly locked at
     # teardown; we don't want that to mask a passing REST run.
-    with tempfile.TemporaryDirectory(prefix="appliance-fixer-rest-", ignore_cleanup_errors=True) as tmp:
+    with tempfile.TemporaryDirectory(prefix="home-rescue-rest-", ignore_cleanup_errors=True) as tmp:
         tmp_path = Path(tmp)
         os.environ["APP_DB"] = str(tmp_path / "import-side-effect.db")
         os.environ["MEDIA_ROOT"] = str(tmp_path / "media")
@@ -296,7 +296,7 @@ def _run(label: str, fn) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Run deterministic Appliance Fixer demo E2E checks."
+        description="Run deterministic HomeRescue demo E2E checks."
     )
     parser.add_argument(
         "--db",
@@ -309,7 +309,7 @@ def main(argv: list[str] | None = None) -> int:
         db_path = Path(args.db)
         db_path.parent.mkdir(parents=True, exist_ok=True)
     else:
-        temp_dir = tempfile.TemporaryDirectory(prefix="appliance-fixer-e2e-")
+        temp_dir = tempfile.TemporaryDirectory(prefix="home-rescue-e2e-")
         db_path = Path(temp_dir.name) / "e2e.db"
 
     checks = [

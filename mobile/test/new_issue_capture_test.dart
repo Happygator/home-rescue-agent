@@ -1,15 +1,15 @@
 import 'dart:convert';
 
-import 'package:appliance_fixer/api/api_client.dart';
-import 'package:appliance_fixer/screens/new_issue_screen.dart';
-import 'package:appliance_fixer/theme.dart';
+import 'package:home_rescue/api/api_client.dart';
+import 'package:home_rescue/screens/new_issue_screen.dart';
+import 'package:home_rescue/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
-  testWidgets('camera-denied manual entry offers photo fallback', (tester) async {
+  testWidgets('a cancelled/denied capture attaches no photo', (tester) async {
     final client = ApiClient(
       baseUrl: 'http://test',
       client: MockClient.streaming((req, body) async {
@@ -26,14 +26,16 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(),
-        home: NewIssueScreen(client: client, capturePlate: () async => null),
+        home: NewIssueScreen(client: client, capturePhoto: () async => null),
       ),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.photo_camera_outlined));
+    await tester.tap(find.text('Add a photo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose from photos'), findsOneWidget);
+    // Nothing was attached, so the attach affordance stays and no thumbnail appears.
+    expect(find.text('Photo attached'), findsNothing);
+    expect(find.text('Add a photo'), findsOneWidget);
   });
 }

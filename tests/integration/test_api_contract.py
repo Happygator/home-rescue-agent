@@ -33,6 +33,7 @@ DETAIL_KEYS = {
     "steps",
     "next_step",
     "media",
+    "messages",
     "escalation",
     "created_at",
     "updated_at",

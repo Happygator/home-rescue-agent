@@ -1,4 +1,4 @@
-# appliance_fixer
+# home_rescue
 
 A new Flutter project.
 

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:appliance_fixer/models.dart';
+import 'package:home_rescue/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

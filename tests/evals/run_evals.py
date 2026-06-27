@@ -1,4 +1,4 @@
-"""Run the Appliance Fixer eval suite.
+"""Run the HomeRescue eval suite.
 
 Gates:
 - plate_read: at least 7/8, scaled as ceil(total * 7/8) for smaller limits.
@@ -37,7 +37,7 @@ def _plate_result(limit, sleep, fixtures):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Run all Appliance Fixer evals.")
+    parser = argparse.ArgumentParser(description="Run all HomeRescue evals.")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--sleep", type=float, default=4.0)
     parser.add_argument("--no-grounding", action="store_true")

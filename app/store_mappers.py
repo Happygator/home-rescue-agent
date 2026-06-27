@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from app.models import (Diagnosis, Escalation, InspectionShot, IssueDetail, IssueSummary,
-                        MediaRef, Packet, Step)
-from appliance_fixer.next_step import derive_next_step
+from app.models import (ChatTurn, Diagnosis, Escalation, EscalationStep, InspectionShot,
+                        IssueDetail, IssueSummary, MediaRef, Packet, Step)
+from home_rescue.next_step import derive_next_step
 
 
 def _title(case):
@@ -26,9 +26,12 @@ def _map_escalation(e):
     guide = [InspectionShot(shot_no=s.get("shot_no", i + 1), what_to_film=s.get("what_to_film", ""),
                             where=s.get("where", ""), narration=s.get("narration", ""))
              for i, s in enumerate(e.get("inspection_guide") or [])]
+    steps = [EscalationStep(order=s.get("order", i + 1), instruction=s.get("instruction", ""),
+                            kind=s.get("kind", "action"), wait_hours=s.get("wait_hours"))
+             for i, s in enumerate(e.get("escalation_steps") or [])]
     return Escalation(recipient=e.get("recipient", ""), drafted_email=e.get("drafted_email", ""),
-                      inspection_guide=guide, packet=_map_packet(e.get("packet")),
-                      sent=bool(e.get("sent", False)))
+                      inspection_guide=guide, escalation_steps=steps,
+                      packet=_map_packet(e.get("packet")), sent=bool(e.get("sent", False)))
 
 
 def case_to_summary(case):
@@ -49,6 +52,9 @@ def case_to_detail(case):
     media = [MediaRef(kind=m.get("kind", "symptom"), ref=m.get("ref", ""),
                       mime=m.get("mime", "application/octet-stream"), taken_at=m.get("taken_at"))
              for m in data.get("media") or []]
+    messages = [ChatTurn(role=m.get("role", "agent"), text=m.get("text", ""), ts=m.get("ts"),
+                         media_ref=m.get("media_ref"))
+                for m in data.get("messages") or []]
     return IssueDetail(
         case_id=case["case_id"], title=_title(case), brand=case.get("brand"),
         appliance=case.get("appliance"), model_number=case.get("model_number"),
@@ -56,7 +62,7 @@ def case_to_detail(case):
         error_code=data.get("error_code"),
         diagnosis=Diagnosis(hypothesis=diag["hypothesis"], confidence=diag.get("confidence", ""))
         if diag else None,
-        steps=steps, next_step=derive_next_step(case), media=media,
+        steps=steps, next_step=derive_next_step(case), media=media, messages=messages,
         escalation=_map_escalation(data.get("escalation")),
         created_at=case.get("created_at") or "", updated_at=case.get("updated_at") or "",
     )

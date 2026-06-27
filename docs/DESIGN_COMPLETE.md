@@ -201,7 +201,7 @@ backendless alternative:
 
 ### Module map (as built / planned)
 ```
-appliance_fixer/
+home_rescue/
   agent.py        LlmAgent: persona + gather-then-fix loop prompt; tool wiring.
                   Tools: read_spec_plate, verify_model_number, reopen_existing_case,
                   initialize_new_case, lookup_fixes, record_step_result,
@@ -270,10 +270,12 @@ The agent's only built-in surface is ADK's generic dev playground (`adk web`) �
 chat with no concept of "my open problems," and not a phone experience. The **Flutter app** is the
 purpose-built client with three headline requirements:
 
-1. A prominent **"+ New Repair"** action (a floating action button) that **opens the camera
-   immediately** to capture the spec plate, then drops the user straight into the chat — there is
-   **no intake form/modal**; the agent gathers the appliance, brand, model, and symptom in
-   conversation (§9, phase 1).
+1. A prominent **"+ New Repair"** action (a floating action button) that opens a **brief composer** —
+   the user describes what's wrong and can attach **one optional photo**. On **"Start diagnosis"** the
+   app seeds that description (with the photo) as the **first chat message** and drops the user into
+   the chat, where the agent **auto-starts**. It then gathers the appliance, brand, and model in
+   conversation (§9, phase 1) and reads the attached photo in context — it may be a spec plate or the
+   symptom, so the agent decides rather than assuming.
 2. An **at-a-glance list of all unresolved repairs**, each with a one-line **"next steps"** summary.
 3. At escalation, a **guided video-capture screen** that walks the user shot-by-shot through the
    inspection video and assembles the service-ready packet.
@@ -296,8 +298,9 @@ already exists; it invents no new data model.
   showing title + color-coded status badge, a muted meta line (`model · "updated" time`), the
   truncated symptom, a highlighted **`Next →`** strip, and a **Continue** affordance (Escalated
   cards show **Review**). Pull-to-refresh. Resolved repairs live behind a "View resolved (n)" link.
-  A prominent **"+ New Repair"** FAB opens the camera (spec-plate capture) and navigates **straight
-  into the chat** — no modal, no form.
+  A prominent **"+ New Repair"** FAB opens a short composer (describe the problem + one optional
+  photo); **"Start diagnosis"** seeds it as the first chat message and navigates into the chat, where
+  the agent **auto-starts** (reading the photo in context).
 - **Repair detail / chat:** a collapsible top sheet shows the structured case from `CaseStore`
   (symptom, diagnosis, steps as a green/amber checklist, the next step, an **Escalate to a pro**
   action). Below it, the live agent chat. The composer has a **camera button** for capturing the
@@ -537,7 +540,7 @@ Greenfield discipline: every path ships with its test.
 4. **Day 3-4:** `safety.py` callback + prompt rules; `safety_eval`; `plate_read_eval`.
 5. **Day 4-5:** `draft_escalation` (draft-only) + **`generate_inspection_guide`** and the
    `inspection_shots` curated hints; thicken the recap; harden the fridge path.
-6. **Day 5-6:** **Flutter app** — Home/My Repairs list, camera-first New Repair, chat (SSE),
+6. **Day 5-6:** **Flutter app** — Home/My Repairs list, describe-first New Repair composer, chat (SSE),
    detail sheet, escalation/inspection screen with guided video capture + share. Wire to REST.
 7. **Day 6-7:** demo reruns on a real device. Optionals GATED — at most one, only after the core
    (fridge E2E + safety refusal + resume + inspection-packet escalation) is recorded.
@@ -623,7 +626,7 @@ and tool shapes) partners implement; the hard parts are B2B sales, liability all
 the deterministic SafetyGuard), and the chicken-and-egg of reach-vs-coverage. See BRAINSTORM §5.2.
 
 **How it fits THIS architecture — a swap behind an existing seam.** `lookup_fixes` → `get_fixes`
-([grounding.py](../appliance_fixer/grounding.py)) already isolates the data lookup, and decision #4
+([grounding.py](../home_rescue/grounding.py)) already isolates the data lookup, and decision #4
 (one config module per appliance) and #6 (cache expensive reads) already assume the fix source is
 pluggable. Productizing = registering the manufacturer's MCP server as an ADK `MCPToolset` so its
 workflow-lookup and dispatch tools sit behind `lookup_fixes`, and upgrading `draft_escalation` (§7)

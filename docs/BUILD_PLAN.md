@@ -1,11 +1,11 @@
-# Build Plan: Appliance Fixer (rebuild → Flutter mobile app)
+# Build Plan: HomeRescue (rebuild → Flutter mobile app)
 
 Status: REVIEWED (eng + outside voice) · 2026-06-24
 Stack: Google ADK + Gemini 2.5 Flash (multimodal) · SQLite · FastAPI (REST + SSE) · **Flutter mobile app (iOS + Android)**
 Canonical design: [DESIGN_COMPLETE.md](./DESIGN_COMPLETE.md) (supersedes [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md), the older `adk web`-only build).
 
 > **Scope decisions (locked 2026-06-24, confirmed in eng review):**
-> 1. **Rebuild from scratch.** The backend committed in `04bb38b` (`appliance_fixer/`, `app/`, `tests/`)
+> 1. **Rebuild from scratch.** The backend committed in `04bb38b` (`home_rescue/`, `app/`, `tests/`)
 >    is **reference only** — it matches the old `adk web` design. Recover snippets with `git show 04bb38b:<path>`;
 >    the new tree is authored fresh.
 > 2. **Full Flutter mobile app** is the committed client surface (screens F1–F5). The existing `frontend/`
@@ -52,7 +52,7 @@ over a real store) · **widget/E2E** (Flutter) · **smoke** (manual, on device).
 | **B9** | 3-eval harness + fixtures + deep state tests + one-command runner | Backend evals | B3,B5,B6 | eval | live→fixture |
 | **F1** | Flutter scaffold + API client + models (REST/SSE) — builds on the **B2.5 stub** | Flutter | B2.5 | widget | none |
 | **F2** | Home — My Issues list (cards, badges, next-step, FAB, resolved view) | Flutter | F1 | widget | none |
-| **F3** | New Issue camera-first intake → create case **first**, then media/plate | Flutter | F1, B8 | widget + smoke | fixture |
+| **F3** | New Issue composer → create case **first**, then optional media + seed first chat message | Flutter | F1, B8 | widget + smoke | fixture |
 | **F4** | Issue detail / chat (summary sheet + SSE chat + camera + safety bubble) | Flutter | F1, B8 | widget + smoke | fixture |
 | **F5** | Escalation / Inspection screen (draft + guided video capture + share sheet) | Flutter | F1, B7, B8 | widget + smoke | none |
 | **F6** | Mobile baseline: permissions + media upload + denied-state fallbacks | Flutter | F1–F5 | widget + smoke | none |
@@ -66,7 +66,7 @@ over a real store) · **widget/E2E** (Flutter) · **smoke** (manual, on device).
 ### B1 — Scaffold + CaseStore + status-transition function
 - **Goal:** one DB row per repair; whole-case read/write; **one** place that owns status transitions.
 - **Depends on:** —
-- **Build:** scaffold (`pyproject.toml`, layout per DESIGN_COMPLETE §6); `appliance_fixer/case_store.py` —
+- **Build:** scaffold (`pyproject.toml`, layout per DESIGN_COMPLETE §6); `home_rescue/case_store.py` —
   `new_case / load_case / save_case / recap`; SQLite `cases(case_id PK, user_id, appliance, brand, model_number,
   status, data JSON, created_at, updated_at)`. CaseFile blob: `symptom_text, error_code, media[], steps[], cache{},
   diagnosis{}, escalation|null` — **no `next_step` field** (derived live, §decision 6). A single
@@ -81,7 +81,7 @@ over a real store) · **widget/E2E** (Flutter) · **smoke** (manual, on device).
 ### B2 — Reopen walking skeleton (HEADLINE, built early)
 - **Goal:** the resume mechanism — `reopen_existing_case(case_id) → recap → continue` in a fresh session.
 - **Depends on:** B1.
-- **Build:** `appliance_fixer/reopen.py`; minimal ADK agent stub that accepts a reopen and replays the recap (full
+- **Build:** `home_rescue/reopen.py`; minimal ADK agent stub that accepts a reopen and replays the recap (full
   loop lands in B5). Subsumes the pending **resume-feasibility spike** (DESIGN_COMPLETE §4).
 - **✅ Verify (isolated):** `pytest tests/test_reopen.py` — `new → save → close → load_case(case_id) → recap →
   continue`; missing/corrupt `case_id` → clear error. Headline E2E, **zero** API calls.
@@ -111,9 +111,9 @@ over a real store) · **widget/E2E** (Flutter) · **smoke** (manual, on device).
 ### B4 — Thin curated layer + `get_fixes` + caching
 - **Goal:** the spike-confirmed thin KB and the pluggable fix source.
 - **Depends on:** B1.
-- **Build:** `appliance_fixer/appliances/fridge.py` — `error_codes`, `safety_rules`, ~3–5 corrections (F2
+- **Build:** `home_rescue/appliances/fridge.py` — `error_codes`, `safety_rules`, ~3–5 corrections (F2
   coils-vs-seal, F8 evap-vs-condenser, Samsung `OF OF` demo-mode), clarifying hints, `model_patterns`,
-  `support_contact`, **`inspection_shots`**. `appliance_fixer/grounding.py` — `get_fixes`: curated first,
+  `support_contact`, **`inspection_shots`**. `home_rescue/grounding.py` — `get_fixes`: curated first,
   iFixit/Search optional; cached into `data.cache.grounded_fixes` (decision #6).
 - **✅ Verify (isolated):** `pytest tests/test_grounding.py` — known code → meaning; out-of-table code → verbatim
   "check your manual" (never guessed); ranked curated fixes with grounding off; second call hits cache; validate
@@ -129,7 +129,7 @@ Capture recorded-response fixtures FIRST (DESIGN_COMPLETE §4). Production model
 ### B3 — Perception tools
 - **Goal:** read the spec plate; canonicalize the model number.
 - **Depends on:** B1.
-- **Build:** `appliance_fixer/tools.py` — `read_spec_plate` (Gemini mm), `validate_model` (per-brand regex +
+- **Build:** `home_rescue/tools.py` — `read_spec_plate` (Gemini mm), `validate_model` (per-brand regex +
   membership + **O↔0 / I↔1**, strip ` 00` / `/AA`), `normalize_model` / `canonicalize_symbols`. Cache plate-read
   into `data.cache.plate_read` (decision #6).
 - **✅ Verify (isolated):** `pytest tests/test_tools.py` — `validate_model` malformed / valid-but-wrong / **O-0,
@@ -140,7 +140,7 @@ Capture recorded-response fixtures FIRST (DESIGN_COMPLETE §4). Production model
 ### B5 — Agent gather-then-fix loop
 - **Goal:** gather facts → iterate one ranked safe fix → exit on resolved/escalate.
 - **Depends on:** B1, B3, B4 (and B2's reopen entry).
-- **Build:** `appliance_fixer/agent.py` — `LlmAgent` persona + gather-then-fix prompt; tool wiring
+- **Build:** `home_rescue/agent.py` — `LlmAgent` persona + gather-then-fix prompt; tool wiring
   (`read_spec_plate, validate_model, reopen_existing_case, initialize_new_case, lookup_fixes, record_step_result,
   generate_escalation_draft, generate_inspection_guide`). `record_step_result`: **deterministic** yes/no →
   `outcome`, and it drives status only through `transition()` (B1) — sets `awaiting_user` on a pending/`unsure`
@@ -154,7 +154,7 @@ Capture recorded-response fixtures FIRST (DESIGN_COMPLETE §4). Production model
 - **Goal:** deterministic refusal of dangerous work (gas / mains electrical / water-on-electrics / refrigerant) →
   force the escalate branch, with a backstop that can actually see what it's guarding.
 - **Depends on:** B5.
-- **Build:** `appliance_fixer/safety.py` — **`after_model_callback`** scans the model's *response* for dangerous
+- **Build:** `home_rescue/safety.py` — **`after_model_callback`** scans the model's *response* for dangerous
   steps (a `before_model_callback` fires before generation and can't see output), **plus `before_tool_callback`**
   to block a dangerous tool invocation (e.g. a step instruction that slips past text scanning). Prompt rules in the
   persona (defense in depth). On trip: force escalate **and** still run B7 (packet). Note streaming: the guard
@@ -239,13 +239,17 @@ tests** (offline, mocked client) + a manual **device smoke**.
   blue · escalated red · resolved green); resolved hidden; `Next →` renders. Smoke: scroll + pull-to-refresh.
 - **Quota:** none.
 
-### F3 — New Issue camera-first intake (corrected order — Codex #2)
+### F3 — New Issue composer intake
 - **Depends on:** F1, B8.
-- **Build:** **+** opens the camera immediately → **`POST /api/issues` first (get `case_id`)** → then
-  `POST /{case_id}/media` + `POST /{case_id}/plate` (auto-fill brand/model/error, user-correctable) → navigate
-  into detail (F4). No intake form/modal. Camera-denied → type-in fallback (DESIGN_COMPLETE §11).
-- **✅ Verify:** widget test — create posts case first, then media/plate to the returned id (mock client); plate
-  auto-fill populates editable fields; permission-denied → type-in fallback. Smoke: real camera + plate pre-fill.
+- **Build:** **+** opens a composer ("What's going on with your appliance?") — a multiline description
+  field + **one optional photo** (Add a photo / Choose from photos). On **Start diagnosis**:
+  **`POST /api/issues` first (typed symptom → `case_id`)** → optional `POST /{case_id}/media` (inline retry) →
+  `POST /{case_id}` to seed the description as the **first user message** (photo via `media_ref`, rendered
+  inline) → navigate into detail (F4), where the agent **auto-kicks** (`POST /{case_id}/start`) with the photo
+  passed to Gemini. No scripted chat, no in-intake plate scan, no model-number entry.
+- **✅ Verify:** widget test — Start posts the case first, then media, then the seeded first message to the
+  returned id (mock client); empty description disables Start; the seeded description + photo render in chat.
+  Smoke: real camera/library attach → kickoff reads the photo in context.
 - **Quota:** fixture.
 
 ### F4 — Issue detail / chat

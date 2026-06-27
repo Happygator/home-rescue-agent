@@ -1,0 +1,78 @@
+<svg viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#1E293B"/>
+    </linearGradient>
+    <filter id="card" x="-8%" y="-20%" width="116%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <rect width="390" height="844" fill="#F8FAFC"/>
+
+  <!-- Header with back to launchpad -->
+  <rect width="390" height="100" fill="url(#hdr)"/>
+  <text x="22" y="29" fill="#FFFFFF" font-size="13" font-weight="600">9:41</text>
+  <rect x="312" y="26" width="3" height="4" fill="#FFFFFF"/>
+  <rect x="318" y="23" width="3" height="7" fill="#FFFFFF"/>
+  <rect x="324" y="20" width="3" height="10" fill="#FFFFFF"/>
+  <rect x="350" y="20" width="20" height="10" rx="2" fill="none" stroke="#FFFFFF" stroke-width="1.2"/>
+  <rect x="352" y="22" width="13" height="6" rx="1" fill="#FFFFFF"/>
+  <rect x="371" y="22.5" width="2" height="5" rx="1" fill="#FFFFFF"/>
+  <path d="M28 70 l-9 9 l9 9" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="44" y="85" fill="#FFFFFF" font-size="17" font-weight="700">My issues</text>
+
+  <!-- Section heading -->
+  <text x="16" y="140" font-size="22" font-weight="700" fill="#0F172A">Open Issues</text>
+  <text x="16" y="162" font-size="12" fill="#64748B">3 unresolved &#183; most recent first</text>
+
+  <!-- Card 1: awaiting you (blue) -->
+  <rect x="16" y="180" width="358" height="138" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
+  <rect x="16" y="180" width="4" height="138" rx="2" fill="#3B82F6"/>
+  <text x="32" y="208" font-size="15.5" font-weight="700" fill="#0F172A">Samsung &#183; Refrigerator</text>
+  <rect x="258" y="194" width="100" height="20" rx="10" fill="#DBEAFE"/>
+  <circle cx="271" cy="204" r="3.2" fill="#3B82F6"/>
+  <text x="312" y="208" font-size="10.5" font-weight="700" fill="#1D4ED8" text-anchor="middle">AWAITING YOU</text>
+  <text x="32" y="228" font-size="12" fill="#94A3B8">RF28R7201 &#183; updated 2h ago</text>
+  <text x="32" y="250" font-size="13" fill="#475569">Fresh-food side warm; freezer still cold.</text>
+  <rect x="32" y="266" width="326" height="38" rx="9" fill="#EFF6FF"/>
+  <text x="44" y="282" font-size="11.5" font-weight="700" fill="#1E40AF">Next &#8594;</text>
+  <text x="44" y="297" font-size="11.5" fill="#1E40AF">You were asked to check the water-line shutoff.</text>
+
+  <!-- Card 2: diagnosing (amber) -->
+  <rect x="16" y="334" width="358" height="120" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
+  <rect x="16" y="334" width="4" height="120" rx="2" fill="#F59E0B"/>
+  <text x="32" y="362" font-size="15.5" font-weight="700" fill="#0F172A">Bosch &#183; Dishwasher</text>
+  <rect x="266" y="348" width="92" height="20" rx="10" fill="#FEF3C7"/>
+  <circle cx="279" cy="358" r="3.2" fill="#F59E0B"/>
+  <text x="316" y="362" font-size="10.5" font-weight="700" fill="#B45309" text-anchor="middle">DIAGNOSING</text>
+  <text x="32" y="382" font-size="12" fill="#94A3B8">SHE3AR75UC &#183; updated yesterday</text>
+  <text x="32" y="404" font-size="13" fill="#475569">Not draining; standing water in the tub.</text>
+  <rect x="32" y="420" width="326" height="20" rx="9" fill="#EFF6FF"/>
+  <text x="44" y="434" font-size="11.5" fill="#1E40AF"><tspan font-weight="700">Next &#8594;</tspan>  Confirm the drain hose isn&#8217;t kinked.</text>
+
+  <!-- Card 3: escalated (red) -->
+  <rect x="16" y="470" width="358" height="120" rx="14" fill="#FFFFFF" stroke="#EAEEF3" filter="url(#card)"/>
+  <rect x="16" y="470" width="4" height="120" rx="2" fill="#EF4444"/>
+  <text x="32" y="498" font-size="15.5" font-weight="700" fill="#0F172A">LG &#183; Washer</text>
+  <rect x="276" y="484" width="82" height="20" rx="10" fill="#FEE2E2"/>
+  <circle cx="289" cy="494" r="3.2" fill="#EF4444"/>
+  <text x="322" y="498" font-size="10.5" font-weight="700" fill="#B91C1C" text-anchor="middle">ESCALATED</text>
+  <text x="32" y="518" font-size="12" fill="#94A3B8">WM3900HWA &#183; updated 3 days ago</text>
+  <text x="32" y="540" font-size="13" fill="#475569">Leaking from the door during spin cycle.</text>
+  <rect x="32" y="556" width="326" height="20" rx="9" fill="#FEF2F2"/>
+  <text x="44" y="570" font-size="11.5" fill="#B91C1C"><tspan font-weight="700">Next &#8594;</tspan>  Pro service required &#8212; packet ready to send.</text>
+
+  <!-- Resolved link -->
+  <text x="16" y="624" font-size="13" fill="#64748B">Showing open issues &#183; </text>
+  <text x="173" y="624" font-size="13" font-weight="600" fill="#2563EB">View resolved (4)</text>
+
+  <!-- FAB -->
+  <circle cx="330" cy="762" r="28" fill="#2563EB" filter="url(#card)"/>
+  <rect x="316" y="761" width="28" height="2.6" rx="1.3" fill="#FFFFFF"/>
+  <rect x="328.7" y="748" width="2.6" height="28" rx="1.3" fill="#FFFFFF"/>
+
+  <!-- Home indicator -->
+  <rect x="131" y="828" width="128" height="5" rx="2.5" fill="#CBD5E1"/>
+</svg>

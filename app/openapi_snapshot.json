@@ -20,6 +20,51 @@
         "title": "Body_upload_media_api_issues__case_id__media_post",
         "type": "object"
       },
+      "ChatTurn": {
+        "properties": {
+          "media_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Ref"
+          },
+          "role": {
+            "enum": [
+              "user",
+              "agent",
+              "safety"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "ts": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ts"
+          }
+        },
+        "required": [
+          "role",
+          "text"
+        ],
+        "title": "ChatTurn",
+        "type": "object"
+      },
       "CreateIssueRequest": {
         "properties": {
           "appliance": {
@@ -31,7 +76,6 @@
                 "type": "null"
               }
             ],
-            "default": "Refrigerator",
             "title": "Appliance"
           },
           "brand": {
@@ -107,6 +151,24 @@
         "title": "CreateIssueResponse",
         "type": "object"
       },
+      "DeleteIssueResponse": {
+        "properties": {
+          "case_id": {
+            "title": "Case Id",
+            "type": "string"
+          },
+          "deleted": {
+            "title": "Deleted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "case_id",
+          "deleted"
+        ],
+        "title": "DeleteIssueResponse",
+        "type": "object"
+      },
       "Diagnosis": {
         "properties": {
           "confidence": {
@@ -130,6 +192,13 @@
           "drafted_email": {
             "title": "Drafted Email",
             "type": "string"
+          },
+          "escalation_steps": {
+            "items": {
+              "$ref": "#/components/schemas/EscalationStep"
+            },
+            "title": "Escalation Steps",
+            "type": "array"
           },
           "inspection_guide": {
             "items": {
@@ -155,6 +224,13 @@
           "drafted_email": {
             "title": "Drafted Email",
             "type": "string"
+          },
+          "escalation_steps": {
+            "items": {
+              "$ref": "#/components/schemas/EscalationStep"
+            },
+            "title": "Escalation Steps",
+            "type": "array"
           },
           "inspection_guide": {
             "items": {
@@ -188,6 +264,40 @@
           "drafted_email"
         ],
         "title": "Escalation",
+        "type": "object"
+      },
+      "EscalationStep": {
+        "properties": {
+          "instruction": {
+            "title": "Instruction",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "order": {
+            "title": "Order",
+            "type": "integer"
+          },
+          "wait_hours": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wait Hours"
+          }
+        },
+        "required": [
+          "order",
+          "instruction",
+          "kind"
+        ],
+        "title": "EscalationStep",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -299,6 +409,13 @@
               "$ref": "#/components/schemas/MediaRef"
             },
             "title": "Media",
+            "type": "array"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTurn"
+            },
+            "title": "Messages",
             "type": "array"
           },
           "model_number": {
@@ -491,6 +608,17 @@
       },
       "MessageRequest": {
         "properties": {
+          "media_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Ref"
+          },
           "text": {
             "title": "Text",
             "type": "string"
@@ -696,6 +824,82 @@
         "title": "Step",
         "type": "object"
       },
+      "UpdateIssueRequest": {
+        "description": "Patch intake fields after the camera-first case is created. `messages` are appended\nto the persisted transcript (never replace it).",
+        "properties": {
+          "appliance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appliance"
+          },
+          "brand": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "messages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ChatTurn"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Messages"
+          },
+          "model_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Number"
+          },
+          "symptom_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symptom Text"
+          }
+        },
+        "title": "UpdateIssueRequest",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -739,8 +943,8 @@
     }
   },
   "info": {
-    "description": "Stub REST and SSE contract for the Appliance Fixer client.",
-    "title": "Appliance Fixer API",
+    "description": "Stub REST and SSE contract for the HomeRescue client.",
+    "title": "HomeRescue API",
     "version": "0.1.0"
   },
   "openapi": "3.1.0",
@@ -826,6 +1030,43 @@
       }
     },
     "/api/issues/{case_id}": {
+      "delete": {
+        "operationId": "delete_issue_api_issues__case_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteIssueResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Issue"
+      },
       "get": {
         "operationId": "get_issue_api_issues__case_id__get",
         "parameters": [
@@ -862,6 +1103,53 @@
           }
         },
         "summary": "Get Issue"
+      },
+      "post": {
+        "operationId": "update_issue_api_issues__case_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Issue"
       }
     },
     "/api/issues/{case_id}/escalate": {
@@ -950,6 +1238,53 @@
           }
         },
         "summary": "Upload Media"
+      }
+    },
+    "/api/issues/{case_id}/media/{ref}": {
+      "get": {
+        "description": "Serve a previously uploaded media file so the client can render it inline in chat.",
+        "operationId": "get_media_api_issues__case_id__media__ref__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "ref",
+            "required": true,
+            "schema": {
+              "title": "Ref",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Media"
       }
     },
     "/api/issues/{case_id}/message": {
@@ -1085,6 +1420,44 @@
           }
         },
         "summary": "Resolve Issue"
+      }
+    },
+    "/api/issues/{case_id}/start": {
+      "post": {
+        "description": "Auto-kickoff: run ONE agent turn so Gemini produces the first fix for a freshly created\ncase, instead of waiting for the user to type. One-shot and idempotent: only an `intake`\ncase with a symptom is eligible, and the turn moves it out of `intake` so it never re-fires.",
+        "operationId": "start_issue_api_issues__case_id__start_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start Issue"
       }
     }
   }

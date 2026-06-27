@@ -1,10 +1,10 @@
-# Frontend Design: Appliance Fixer — Mobile App (iOS + Android)
+# Frontend Design: HomeRescue — Mobile App (iOS + Android)
 
 Status: PROPOSED · 2026-06-21 (revised 2026-06-24 — mobile-first)
-Owner: (you) · Backend: existing Google ADK agent (`appliance_fixer.root_agent`)
+Owner: (you) · Backend: existing Google ADK agent (`home_rescue.root_agent`)
 Related: [APP_SPEC.md](./APP_SPEC.md), [DESIGN.md](./DESIGN.md), [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md)
 
-![Appliance Fixer dashboard on a phone](assets/dashboard-hero.svg)
+![HomeRescue dashboard on a phone](assets/dashboard-hero.svg)
 
 ## 1. Purpose
 
@@ -14,7 +14,8 @@ ephemeral chat with no concept of "my open problems." This document designs the 
 holds while standing in front of a broken appliance. Two headline requirements:
 
 1. A prominent **New Issue** action — a floating **+** button — that starts a new appliance-problem
-   case. Camera-first, because the user is right there at the appliance.
+   case. Describe-first: the user types what's wrong and can attach one optional photo right there at
+   the appliance.
 2. An **at-a-glance list of all unresolved issues**, each showing a brief **"next steps"** summary so
    the user knows what to do without reopening the chat.
 
@@ -29,7 +30,7 @@ already exists; it does not invent a new data model.
 
 | App concept | Backend reality (today) |
 |-------------|-------------------------|
-| Issue | A row in the `cases` table ([case_store.py](../appliance_fixer/case_store.py)) |
+| Issue | A row in the `cases` table ([case_store.py](../home_rescue/case_store.py)) |
 | Issue ID | `case_id` (e.g. `case-7f3a9c21`) |
 | Unresolved | `status` ∈ `intake, diagnosing, awaiting_user, escalated` (everything except `resolved`) |
 | Title | `brand` + `model_number` + `appliance` |
@@ -74,31 +75,44 @@ The landing screen. Unresolved issues are the entire focus; **New Issue** is the
 
 ## 4. New Issue flow
 
-The **+** opens a **full-screen, camera-first intake** (a phone screen, not a desktop modal). The
-goal is the smallest amount of input that lets the agent start diagnosing: appliance + brand + model
-+ symptom, with an optional spec-plate photo that auto-fills brand/model/error-code via the existing
-`read_spec_plate` tool. On a phone the fastest path is to **scan the plate**, so the camera is one tap
-from the input bar.
+The **+** opens a **full-screen composer** ([new_issue_screen.dart](../mobile/lib/screens/new_issue_screen.dart)),
+not a scripted chat. It's titled **"What's going on with your appliance?"** and asks for the smallest
+thing that lets the agent start: a free-text description, plus **one optional photo**. No appliance
+picker, no brand/model fields, no scripted Q&A — the agent gathers the rest conversationally once the
+chat opens.
 
-![New Issue intake mockup](assets/new-issue-chat.svg)
+![New Issue composer mockup](assets/new-issue-chat.svg)
 
-**Captured (via the chat / scan)**
-- **Appliance type** — defaults to *Refrigerator* (the agent's primary focus).
-- **Brand** and **Model number** — free text; validated server-side via `verify_model_number`.
-- **Scan spec plate** — tap the camera to shoot a photo; the backend runs `read_spec_plate` and
-  pre-fills brand/model/error code (the user can correct them). Reuses the validated plate-read path.
-- **What's wrong?** — the symptom (`symptom_text`).
-- **Error code** *(optional)* — if a code is on the display.
+**Captured on the composer**
+- **Description** — a multiline field ("Describe what it's doing wrong…"). This becomes the case's
+  `symptom_text` **and** the first user message in the chat transcript.
+- **Optional photo** — **Add a photo** (camera) or **Choose from photos** (library). One attachment,
+  shown as a thumbnail with a **Remove** affordance. No presumption about what it is — it may be the
+  spec plate, the symptom, or both; the agent decides in context (next bullet).
 
-**On Create:** `POST /api/issues` → calls `initialize_new_case(...)`, which returns a `case_id` with
-`status = diagnosing`. The app navigates straight into the issue detail (§7) so the user can keep
-talking. The new issue then appears on the dashboard automatically.
+**On "Start diagnosis"** (button disabled until the description is non-empty):
+1. `POST /api/issues` with the typed `symptom` → `initialize_new_case(...)` returns a `case_id`
+   (`status = diagnosing`).
+2. If a photo was attached, `POST /api/issues/{case_id}/media` (with inline retry) → a `media_ref`.
+3. `POST /api/issues/{case_id}` seeds the description as the **first user message** in the transcript,
+   with the photo attached via `media_ref` (rendered inline in the chat bubble).
+4. Navigate to the issue detail / chat (§7), where the agent **auto-kicks off**
+   (`POST /api/issues/{case_id}/start`). The attached image is passed to Gemini on this kickoff turn,
+   so it evaluates the photo in context — no presumption of plate vs. symptom.
 
-**Edge cases** (already handled by the agent, surfaced in the UI):
-- Unreadable plate → "couldn't read it — retake or type the model" (retry ×2 then manual).
-- Valid-but-wrong model → a confirm/retake prompt.
-- Dangerous symptom (gas/refrigerant/mains) → the issue is created but the agent's
-  `before_model_callback` safety guard steers it toward escalation.
+The new issue then appears on the dashboard automatically.
+
+> Spec-plate reading hasn't gone away — it's just no longer a gating intake step. `read_spec_plate`
+> (the `POST /api/issues/{case_id}/plate` route, §5) is still available **within the chat**, and the
+> agent can read a model number straight off the kickoff photo when one is present.
+
+**Edge cases**
+- **Empty description** → **Start diagnosis** stays disabled; nothing is created.
+- **No photo** → fine; the agent asks for whatever it still needs (including a plate photo) in chat.
+- **Photo upload hiccup** → an inline retry (`uploadMediaWithRetry`); a hard failure surfaces a
+  non-blocking "Could not start your issue. Please try again." message and leaves the composer intact.
+- **Dangerous symptom** (gas/refrigerant/mains) → the issue is still created, but the agent's
+  `before_model_callback` safety guard steers the kickoff turn toward escalation.
 
 ## 5. Backend: the new `/api/issues` layer
 
@@ -192,7 +206,8 @@ ADK/Python, so it cannot run on-device — see
 - **Build order**
   1. `GET /api/issues` + `GET /api/issues/{id}` over `CaseStore` (+ tests). Unblocks everything.
   2. Dashboard (list + status badges + next-step strip + FAB).
-  3. New Issue intake → `POST /api/issues` (+ camera/plate scan via `/api/issues/{id}/plate`).
+  3. New Issue composer → `POST /api/issues` (typed symptom) + optional photo upload, then seed the
+     description as the first chat message and hand off to detail (the agent auto-kicks off).
   4. Issue detail: summary card, then wire the chat to `/run_sse` via `reopen_existing_case`.
   5. Persist the derived `next_step`; add the resolved-issues view.
 
@@ -211,7 +226,7 @@ ADK/Python, so it cannot run on-device — see
 2. **`next_step` freshness** — persist-on-write (§6, recommended) vs. compute live per request?
    Persist-on-write is snappier but can lag if the agent changes state outside the tools.
 3. **`awaiting_user` status** — the agent currently only sets `diagnosing`/`resolved`
-   ([agent.py:185](../appliance_fixer/agent.py)). To light up the blue "Awaiting you" badge,
+   ([agent.py:185](../home_rescue/agent.py)). To light up the blue "Awaiting you" badge,
    `record_step_result` should set `awaiting_user` when it logs a step whose `outcome` is
    `unsure`/pending. Small agent tweak — in scope or defer?
 4. **Auth boundary** — fine to keep single-user for the capstone demo, or stub a user id?

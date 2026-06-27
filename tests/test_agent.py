@@ -1,5 +1,5 @@
-from appliance_fixer.agent import core_initialize_new_case, core_record_step_result
-from appliance_fixer.case_store import CaseStore
+from home_rescue.agent import core_initialize_new_case, core_record_step_result
+from home_rescue.case_store import CaseStore
 
 
 def make_store(tmp_path):

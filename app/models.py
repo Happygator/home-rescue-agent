@@ -10,6 +10,17 @@ StepOutcome = Literal["resolved", "not_resolved", "unsure", "skipped", "pending"
 MediaKind = Literal["plate", "symptom", "inspection_video"]
 
 
+ChatRole = Literal["user", "agent", "safety"]
+
+
+class ChatTurn(BaseModel):
+    role: ChatRole
+    text: str
+    ts: Optional[str] = None
+    # Optional ref of an image attached to this turn (resolved via GET /api/issues/{id}/media/{ref}).
+    media_ref: Optional[str] = None
+
+
 class Diagnosis(BaseModel):
     hypothesis: str
     confidence: str
@@ -36,6 +47,13 @@ class InspectionShot(BaseModel):
     narration: str
 
 
+class EscalationStep(BaseModel):
+    order: int
+    instruction: str
+    kind: str
+    wait_hours: Optional[int] = None
+
+
 class Packet(BaseModel):
     summary: str
     model: Optional[str] = None
@@ -51,6 +69,7 @@ class Escalation(BaseModel):
     recipient: str
     drafted_email: str
     inspection_guide: list[InspectionShot] = Field(default_factory=list)
+    escalation_steps: list[EscalationStep] = Field(default_factory=list)
     packet: Optional[Packet] = None
     sent: bool = False
 
@@ -80,13 +99,14 @@ class IssueDetail(BaseModel):
     steps: list[Step] = Field(default_factory=list)
     next_step: str = ""
     media: list[MediaRef] = Field(default_factory=list)
+    messages: list[ChatTurn] = Field(default_factory=list)
     escalation: Optional[Escalation] = None
     created_at: str
     updated_at: str
 
 
 class CreateIssueRequest(BaseModel):
-    appliance: Optional[str] = "Refrigerator"
+    appliance: Optional[str] = None
     brand: Optional[str] = None
     model_number: Optional[str] = None
     symptom: Optional[str] = None
@@ -96,6 +116,17 @@ class CreateIssueRequest(BaseModel):
 
 class CreateIssueResponse(BaseModel):
     case_id: str
+
+
+class UpdateIssueRequest(BaseModel):
+    """Patch intake fields after the camera-first case is created. `messages` are appended
+    to the persisted transcript (never replace it)."""
+    symptom_text: Optional[str] = None
+    appliance: Optional[str] = None
+    brand: Optional[str] = None
+    model_number: Optional[str] = None
+    error_code: Optional[str] = None
+    messages: Optional[list[ChatTurn]] = None
 
 
 class PlateRequest(BaseModel):
@@ -114,14 +145,21 @@ class MediaResponse(BaseModel):
 
 class MessageRequest(BaseModel):
     text: str
+    media_ref: Optional[str] = None
 
 
 class EscalateResponse(BaseModel):
     drafted_email: str
     inspection_guide: list[InspectionShot]
+    escalation_steps: list[EscalationStep] = Field(default_factory=list)
     packet: Packet
 
 
 class ResolveResponse(BaseModel):
     case_id: str
     status: Status
+
+
+class DeleteIssueResponse(BaseModel):
+    case_id: str
+    deleted: bool

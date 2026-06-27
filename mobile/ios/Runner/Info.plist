@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Appliance Fixer</string>
+	<string>HomeRescue</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>appliance_fixer</string>
+	<string>home_rescue</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -67,10 +67,10 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Appliance Fixer uses the camera to scan the spec plate and capture the problem and inspection video.</string>
+	<string>HomeRescue uses the camera to scan the spec plate and capture the problem and inspection video.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Appliance Fixer records narration on the inspection video.</string>
+	<string>HomeRescue records narration on the inspection video.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Appliance Fixer lets you choose an existing photo of the spec plate.</string>
+	<string>HomeRescue lets you choose an existing photo of the spec plate.</string>
 </dict>
 </plist>

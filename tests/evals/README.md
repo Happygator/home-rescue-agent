@@ -1,4 +1,4 @@
-# Appliance Fixer evals
+# HomeRescue evals
 
 Run the full eval suite live:
 

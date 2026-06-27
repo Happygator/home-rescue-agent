@@ -27,6 +27,7 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
   IssueDetail? _detail;
   final List<ChatMessage> _messages = [];
   bool _loading = true;
+  bool _kickedOff = false;
   String? _error;
 
   @override
@@ -50,11 +51,17 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
         _detail = detail;
         _messages
           ..clear()
-          ..addAll(_seedTranscript(detail));
+          ..addAll(_buildTranscript(detail));
         _loading = false;
         _error = null;
       });
       _scrollToBottom();
+      // Auto-kickoff: a fresh intake case with a symptom gets Gemini's first fix immediately
+      // instead of waiting for the user to type. Fires at most once per screen.
+      if (!_kickedOff && detail.status == 'intake' && detail.symptom.trim().isNotEmpty) {
+        _kickedOff = true;
+        _kickoff();
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -62,6 +69,67 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
         _error = e.toString();
       });
     }
+  }
+
+  Future<void> _kickoff() async {
+    final agent = ChatMessage(ChatRole.agent, '');
+    setState(() => _messages.add(agent));
+    _scrollToBottom();
+    var gotToken = false;
+    try {
+      await for (final ev in _api.streamStart(widget.caseId)) {
+        if (ev.type == 'token') {
+          final token = ev.text ?? '';
+          if (token.isNotEmpty) {
+            gotToken = true;
+            _appendToken(agent, token);
+          }
+          if (!mounted) return;
+          setState(() {});
+          _scrollToBottom();
+        }
+      }
+    } catch (_) {
+      // Leave whatever streamed; the user can keep typing to continue.
+    }
+    if (!mounted) return;
+    if (!gotToken) {
+      // Nothing streamed (e.g. already started server-side) -> drop the empty bubble.
+      setState(() => _messages.remove(agent));
+    }
+    // Refresh so the status badge + next-step strip reflect the started diagnosis.
+    try {
+      final refreshed = await _api.getIssue(widget.caseId);
+      if (!mounted) return;
+      setState(() => _detail = refreshed);
+    } catch (_) {}
+  }
+
+  // Prefer the persisted server-side transcript so chat history survives reopen. Only when a
+  // case has no stored messages (e.g. legacy/seeded demo cases) do we synthesize one from steps.
+  List<ChatMessage> _buildTranscript(IssueDetail detail) {
+    if (detail.messages.isNotEmpty) {
+      return detail.messages.map((m) {
+        final role = m.role == 'user'
+            ? ChatRole.user
+            : m.role == 'safety'
+                ? ChatRole.safety
+                : ChatRole.agent;
+        return ChatMessage(
+          role,
+          m.text,
+          imageUrl: m.mediaRef == null ? null : _api.mediaUrl(widget.caseId, m.mediaRef!),
+          sentAtLabel: m.mediaRef == null ? null : _tsLabel(m.ts),
+        );
+      }).toList();
+    }
+    return _seedTranscript(detail);
+  }
+
+  void _appendToken(ChatMessage message, String token) {
+    // Tokens are word-chunks; join with a space so live replies read the same as the
+    // persisted transcript, which the server joins with single spaces.
+    message.text = message.text.isEmpty ? token : '${message.text} $token';
   }
 
   List<ChatMessage> _seedTranscript(IssueDetail detail) {
@@ -115,6 +183,17 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
     await Navigator.of(context).push(MaterialPageRoute(builder: (_) => EscalationScreen(caseId: widget.caseId)));
   }
 
+  // Re-pull the case after an agent turn so the status badge, next-step, and the
+  // escalation hand-off (which only appears once status == 'escalated') reflect any
+  // status change the agent just made via its tools.
+  Future<void> _refreshDetail() async {
+    try {
+      final refreshed = await _api.getIssue(widget.caseId);
+      if (!mounted) return;
+      setState(() => _detail = refreshed);
+    } catch (_) {}
+  }
+
   Future<void> _send() async {
     final text = _text.text.trim();
     if (text.isEmpty) return;
@@ -130,7 +209,10 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
     try {
       await for (final ev in _api.streamMessage(widget.caseId, text)) {
         if (ev.type == 'token') {
-          agent.text += ev.text ?? '';
+          final token = ev.text ?? '';
+          if (token.isNotEmpty) {
+            _appendToken(agent, token);
+          }
           if (!mounted) return;
           setState(() {});
           _scrollToBottom();
@@ -142,6 +224,7 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
       setState(() {});
       _scrollToBottom();
     }
+    await _refreshDetail();
   }
 
   Future<void> _captureSymptomPhoto() async {
@@ -154,25 +237,82 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
       return;
     }
 
+    String ref;
     try {
-      await uploadMediaWithRetry(
+      ref = await uploadMediaWithRetry(
         _api,
         widget.caseId,
         bytes,
         filename: 'symptom.jpg',
         kind: 'symptom',
       );
-      if (!mounted) return;
-      setState(() {
-        _messages.add(ChatMessage(ChatRole.agent, 'Got your photo - looking at it now.'));
-      });
-      _scrollToBottom();
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Upload failed, will retry')),
       );
+      return;
     }
+
+    if (!mounted) return;
+    final agent = ChatMessage(ChatRole.agent, '');
+    setState(() {
+      _messages
+        ..add(ChatMessage(
+          ChatRole.user,
+          '',
+          imageUrl: _api.mediaUrl(widget.caseId, ref),
+          sentAtLabel: _clockLabel(TimeOfDay.now()),
+        ))
+        ..add(agent);
+    });
+    _scrollToBottom();
+
+    // Actually run an agent turn on the photo so the user gets the read/assessment back,
+    // instead of a dead "looking at it now" message that never resolves.
+    try {
+      await for (final ev in _api.streamMessage(widget.caseId, '', mediaRef: ref)) {
+        if (ev.type == 'token') {
+          final token = ev.text ?? '';
+          if (token.isNotEmpty) {
+            _appendToken(agent, token);
+          }
+          if (!mounted) return;
+          setState(() {});
+          _scrollToBottom();
+        }
+      }
+      if (agent.text.isEmpty) {
+        agent.text = 'Got your photo, but could not read anything from it.';
+        if (!mounted) return;
+        setState(() {});
+        _scrollToBottom();
+      }
+    } catch (_) {
+      if (agent.text.isEmpty) {
+        agent.text = 'Got your photo, but I could not analyze it. Please try again.';
+      }
+      if (!mounted) return;
+      setState(() {});
+      _scrollToBottom();
+    }
+    await _refreshDetail();
+  }
+
+  // Format a wall-clock label like "10:34 AM" without needing localization context.
+  String _clockLabel(TimeOfDay t) {
+    final hour = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final minute = t.minute.toString().padLeft(2, '0');
+    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
+
+  // Parse a persisted ISO timestamp into a short local clock label, or null if absent/unparseable.
+  String? _tsLabel(String? iso) {
+    if (iso == null || iso.isEmpty) return null;
+    final dt = DateTime.tryParse(iso);
+    if (dt == null) return null;
+    return _clockLabel(TimeOfDay.fromDateTime(dt.toLocal()));
   }
 
   void _scrollToBottom() {
@@ -192,6 +332,11 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
         children: [
           AppHeader(title: detail?.displayTitle ?? 'Issue', showBack: true),
           if (detail != null) _subRow(detail),
+          if (detail != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: CaseSummaryCard(detail: detail, onEscalate: () { _escalate(); }),
+            ),
           Expanded(child: _body()),
           if (detail != null) _inputBar(),
         ],
@@ -218,13 +363,60 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
     }
     return ListView(
       controller: _scroll,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       children: [
-        CaseSummaryCard(detail: detail, onEscalate: () { _escalate(); }),
-        const SizedBox(height: 16),
         ..._messages.map((m) => ChatBubble(message: m)),
+        if (detail.status == 'escalated') _escalationCta(),
         const SizedBox(height: 8),
       ],
+    );
+  }
+
+  // Shown once the agent has escalated: an explicit hand-off into the service-packet
+  // (escalation info-gathering) screen, where the user reviews the drafted message,
+  // captures the guided inspection shots, and shares or contacts the pro.
+  Widget _escalationCta() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, bottom: 4),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.nextStripBg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFBFDBFE)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Ready for a professional',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.nextStripText),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Set up the service packet: review the drafted message, capture a quick inspection video, and contact the pro.',
+              style: TextStyle(fontSize: 12, height: 1.35, color: AppColors.nextStripText),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton(
+                onPressed: _escalate,
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  textStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+                ),
+                child: Text('Set up professional service  ${String.fromCharCode(0x2192)}'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -238,7 +430,7 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
           Flexible(
             child: Text('$model $middot ${detail.caseId}',
                 maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12, color: AppColors.textFaint)),
+                style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
           ),
           const SizedBox(width: 8),
           StatusBadge(status: detail.status),

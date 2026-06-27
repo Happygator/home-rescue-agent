@@ -29,11 +29,11 @@ Four hooks:
 
 ```
    ┌─────────────┐
-   │  NEW REPAIR │  tap "+" → camera opens
+   │  NEW REPAIR │  tap "+" → describe it (+ optional photo)
    └──────┬──────┘
           ▼
 ┌──────────────────────────────┐
-│ 1. GATHER                    │   photo of spec plate → read model + error code
+│ 1. GATHER                    │   optional photo → Gemini reads plate / symptom
 │   appliance · brand · model  │   ask for anything still missing (in chat)
 │   · symptom · error code     │   status: intake → diagnosing
 └──────────────┬───────────────┘
@@ -68,7 +68,7 @@ jumps straight to escalation — with the packet still produced.
 
 | Screen | What it shows |
 |--------|---------------|
-| **Home — My Repairs** | List of unresolved cases (newest first): title, status badge, last symptom, a **`Next →`** step, and **Continue**. "+ New Repair" opens the camera. |
+| **Home — My Repairs** | List of unresolved cases (newest first): title, status badge, last symptom, a **`Next →`** step, and **Continue**. "+ New Repair" opens a composer (describe the problem + an optional photo). |
 | **Repair / Chat** | Live agent chat + a collapsible case summary (symptom, diagnosis, steps as a checklist, next step, **Escalate** button). Camera button for plate/symptom photos. |
 | **Escalation / Inspection** | The drafted message + a guided video capture ("Shot 2 of 4: show the display with the E1 code"), then assembles the packet and offers **Share**. |
 

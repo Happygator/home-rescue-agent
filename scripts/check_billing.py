@@ -1,7 +1,7 @@
 """Live Gemini billing / quota probe.
 
 Makes REAL calls to the Gemini API (gemini-2.5-flash by default) using the
-project's AI Studio API key (via appliance_fixer.tools.load_key) and reports
+project's AI Studio API key (via home_rescue.tools.load_key) and reports
 whether calls succeed and whether paid billing appears to be active, vs.
 free-tier rate limiting.
 
@@ -17,7 +17,7 @@ from pathlib import Path
 # Make the repo root importable regardless of cwd.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from appliance_fixer.tools import load_key  # noqa: E402
+from home_rescue.tools import load_key  # noqa: E402
 
 
 def _err_detail(exc):

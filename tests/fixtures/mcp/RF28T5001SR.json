@@ -1,0 +1,84 @@
+{
+  "escalation": {
+    "appliance": "refrigerator",
+    "brand": "SAMSUNG",
+    "error_code": null,
+    "model": "RF28T5001SR",
+    "source": "oem",
+    "steps": [
+      {
+        "instruction": "Check the interior light - confirm it turns on when you open the door.",
+        "kind": "check",
+        "order": 1
+      },
+      {
+        "instruction": "Check the door - make sure it closes and seals completely.",
+        "kind": "check",
+        "order": 2
+      },
+      {
+        "instruction": "Reset the fridge: turn it off (unplug it or switch off its breaker), wait a moment, then turn it back on.",
+        "kind": "action",
+        "order": 3
+      },
+      {
+        "instruction": "Wait 2 hours for the fridge to recover. If it still is not working, call support.",
+        "kind": "wait",
+        "order": 4,
+        "wait_hours": 2
+      }
+    ],
+    "symptom": null
+  },
+  "manual": {
+    "appliance": "refrigerator",
+    "brand": "SAMSUNG",
+    "error_code_url": null,
+    "found": true,
+    "manual_url": "https://www.manualslib.com/manual/2671356/Samsung-Rf28t5001.html",
+    "model": "RF28T5001SR",
+    "pages": {
+      "service_error_codes": 65,
+      "service_self_diagnostic": 63,
+      "user_abnormal_sounds": 61,
+      "user_troubleshooting": 57
+    },
+    "product_line": "36-inch French-Door Refrigerator (28 cu. ft.)",
+    "recalls": [],
+    "warranty_status": "1 yr parts/labor; 10 yr digital inverter compressor (verify per unit)."
+  },
+  "workflows": {
+    "OF OF": {
+      "appliance": "refrigerator",
+      "brand": "SAMSUNG",
+      "dispatch_recommended": false,
+      "error_code": "OF OF",
+      "model": "RF28T5001SR",
+      "steps": [
+        {
+          "citation": "https://www.samsung.com/us/support/troubleshooting/TSG01201784/",
+          "instruction": "Press and hold Power Freeze and Freezer (or Energy Saver) together for 3-5 seconds to exit Demo mode.",
+          "order": 1,
+          "safe": true,
+          "source": "error_code"
+        }
+      ]
+    },
+    "OFF": {
+      "appliance": "refrigerator",
+      "brand": "SAMSUNG",
+      "dispatch_recommended": false,
+      "error_code": "OFF",
+      "model": "RF28T5001SR",
+      "steps": [
+        {
+          "citation": "https://www.samsung.com/us/support/troubleshooting/TSG01201784/",
+          "instruction": "Press and hold Power Freeze and Freezer together for 3-5 seconds to exit Demo mode.",
+          "order": 1,
+          "safe": true,
+          "source": "error_code"
+        }
+      ]
+    }
+  }
+}

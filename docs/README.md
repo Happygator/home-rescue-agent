@@ -1,4 +1,4 @@
-# Appliance Fixer — Project Docs
+# HomeRescue — Project Docs
 
 An ADK + Gemini agent that helps a user fix a household appliance: photograph the model
 plate, diagnose from the symptom, run a safe clarify-then-diagnose loop, and (if needed)
@@ -36,7 +36,7 @@ are historical snapshots from the planning skills and may be stale; do not edit 
 - **Competition track + deadline.** Confirm on the Kaggle page that this capstone is the
   **open-ended** "build an agent" track (some sources reference a separate fixed "Kaggriculture"
   leaderboard) and the exact deadline (sources conflicted: June 30 vs July 6, 2026). An
-  appliance-fixer only counts on the open-ended track.
+  home-rescue only counts on the open-ended track.
 - **API billing / quota.** Production model is **Gemini 2.5 Flash**. Adding billing to the AI Studio key
   is currently blocked; dev runs use free-tier model-bucket switching (a lighter `-lite` bucket) + the
   harness's slim modes. A confirmation diagnosis run on full `gemini-2.5-flash` is deferred until
