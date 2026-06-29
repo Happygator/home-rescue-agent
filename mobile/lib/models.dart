@@ -158,6 +158,7 @@ class Packet {
 
 class Escalation {
   final String recipient;
+  final String? phone;
   final String draftedEmail;
   final List<InspectionShot> inspectionGuide;
   final List<EscalationStep> escalationSteps;
@@ -166,6 +167,7 @@ class Escalation {
 
   Escalation({
     required this.recipient,
+    this.phone,
     required this.draftedEmail,
     required this.inspectionGuide,
     required this.escalationSteps,
@@ -175,6 +177,7 @@ class Escalation {
 
   factory Escalation.fromJson(Map<String, dynamic> j) => Escalation(
         recipient: j['recipient'] as String,
+        phone: j['phone'] as String?,
         draftedEmail: j['drafted_email'] as String,
         inspectionGuide: (j['inspection_guide'] as List)
             .map((e) => InspectionShot.fromJson(e as Map<String, dynamic>))
@@ -344,6 +347,7 @@ class IssueDetail {
             ? null
             : {
                 'recipient': escalation!.recipient,
+                'phone': escalation!.phone,
                 'drafted_email': escalation!.draftedEmail,
                 'inspection_guide': escalation!.inspectionGuide
                     .map((e) => {

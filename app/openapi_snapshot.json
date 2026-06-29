@@ -249,6 +249,17 @@
               }
             ]
           },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
           "recipient": {
             "title": "Recipient",
             "type": "string"

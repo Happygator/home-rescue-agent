@@ -57,7 +57,7 @@ python -m venv .venv
 .venv/Scripts/python.exe -m uvicorn app.fast_api_app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-The server listens on **http://127.0.0.1:8000**. On start it seeds a few demo issues into the SQLite store (`home_rescue.db` in the repo root).
+The server listens on **http://127.0.0.1:8000**. It starts with no issues; any cases you create are persisted in the SQLite store (`home_rescue.db` in the repo root) and remain across restarts.
 
 **Verify it's up** (in a second terminal):
 
@@ -134,7 +134,7 @@ For a **real phone on the same Wi-Fi**, point at your machine's LAN IP and make 
 flutter run --dart-define=API_BASE_URL=http://192.168.x.x:8000
 ```
 
-Once running, the Home screen should show the seeded issues fetched from the backend.
+Once running, the Home screen connects to the backend and shows an empty issue list on a fresh database. Tap **+ New Issue** to create your first case.
 
 ---
 
@@ -202,4 +202,4 @@ flutter pub get
 flutter run -d chrome          # or: flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000  (Android emulator)
 ```
 
-Open the app → the Home list loads the seeded issues from the backend → tap **+ New Issue** to start a diagnosis. Live chat and photo reads require Gemini quota; with quota depleted, demo from the captured fixtures (`tests/evals/fixtures/`) so a 429 never blocks you.
+Open the app → the Home list loads from the backend (empty on a fresh database) → tap **+ New Issue** to start a diagnosis. Live chat and photo reads require Gemini quota; with quota depleted, demo from the captured fixtures (`tests/evals/fixtures/`) so a 429 never blocks you.

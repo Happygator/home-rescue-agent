@@ -156,17 +156,44 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           Text('${list.length} ${_showResolved ? "resolved" : "unresolved"} $dot most recent first',
               style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
           const SizedBox(height: 16),
-          ...list.map((i) => IssueCard(
-                issue: i,
-                onTap: () async {
-                  await Navigator.of(context).push(MaterialPageRoute(builder: (_) => IssueDetailScreen(caseId: i.caseId)));
-                  _load();
-                },
-                onEdit: () => _editIssue(i),
-                onDelete: () => _deleteIssue(i),
-              )),
+          if (list.isEmpty)
+            _emptyState()
+          else
+            ...list.map((i) => IssueCard(
+                  issue: i,
+                  onTap: () async {
+                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => IssueDetailScreen(caseId: i.caseId)));
+                    _load();
+                  },
+                  onEdit: () => _editIssue(i),
+                  onDelete: () => _deleteIssue(i),
+                )),
           const SizedBox(height: 8),
           _footer(dot),
+        ],
+      ),
+    );
+  }
+
+  Widget _emptyState() {
+    final icon = _showResolved ? Icons.inventory_2_outlined : Icons.check_circle_outline;
+    final heading = _showResolved ? 'No resolved issues yet' : 'No open issues';
+    final blurb = _showResolved
+        ? 'Issues you finish fixing will be filed here for your records.'
+        : "You're all caught up. Tap the + button to start a new repair.";
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
+      child: Column(
+        children: [
+          Icon(icon, size: 48, color: AppColors.textFaint),
+          const SizedBox(height: 14),
+          Text(heading,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textBody2)),
+          const SizedBox(height: 6),
+          Text(blurb,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13.5, height: 1.4, color: AppColors.textMuted)),
         ],
       ),
     );

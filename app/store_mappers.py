@@ -29,7 +29,8 @@ def _map_escalation(e):
     steps = [EscalationStep(order=s.get("order", i + 1), instruction=s.get("instruction", ""),
                             kind=s.get("kind", "action"), wait_hours=s.get("wait_hours"))
              for i, s in enumerate(e.get("escalation_steps") or [])]
-    return Escalation(recipient=e.get("recipient", ""), drafted_email=e.get("drafted_email", ""),
+    return Escalation(recipient=e.get("recipient", ""), phone=e.get("phone"),
+                      drafted_email=e.get("drafted_email", ""),
                       inspection_guide=guide, escalation_steps=steps,
                       packet=_map_packet(e.get("packet")), sent=bool(e.get("sent", False)))
 

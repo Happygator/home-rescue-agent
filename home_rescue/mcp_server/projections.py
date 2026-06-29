@@ -50,7 +50,7 @@ def get_manual(model):
         "manual_url": rec.get("manual_url"),
         "error_code_url": rec.get("error_code_url"),
         "pages": rec.get("pages") or {},
-        "warranty_status": rec.get("warranty_note") or "unknown",
+        "warranty_status": rec.get("warranty_status") or "unknown",
         "recalls": rec.get("recalls") or [],
     }
 

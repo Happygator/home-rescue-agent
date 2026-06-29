@@ -46,11 +46,13 @@ def module_for(appliance):
 
 
 # Appliance-type hints (appliance, regex word-stems), checked in order; on a tie the earlier wins.
-# Word-boundary matching means "washer" does NOT fire inside "dishwasher".
+# Word-boundary matching keeps "dish"-related stems from leaking across appliance buckets.
+# Only appliances backed by a curated data module are inferred; unsupported types (e.g. washing
+# machines) deliberately return None so the case degrades gracefully instead of being served the
+# wrong appliance's curated fixes.
 _TYPE_HINTS = (
     ("dishwasher", ("dishwasher", "dish ?washer", "dishes", "rinse aid")),
     ("refrigerator", ("refrigerator", "fridge", "freezer", "fresh ?food", "ice ?maker", "crisper")),
-    ("washer", ("washing machine", "washer", "laundry", "spin cycle")),
 )
 
 
@@ -58,7 +60,8 @@ def infer_appliance(text):
     """Best-effort appliance-type guess from free text (e.g. the user's symptom).
 
     Deterministic keyword match (no model). Returns a canonical appliance key
-    ("refrigerator" / "dishwasher" / "washer") or None when the text gives no clear hint.
+    ("refrigerator" / "dishwasher") or None when the text gives no clear hint or names an
+    unsupported appliance.
     """
     if not text:
         return None

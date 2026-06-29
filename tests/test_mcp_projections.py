@@ -7,7 +7,8 @@ def test_get_manual_projection_dishwasher():
     assert m["brand"] == "LG"
     assert m["appliance"] == "dishwasher"
     assert m["manual_url"].startswith("https://")
-    assert m["warranty_status"] != "unknown"
+    # Actual per-unit warranty status is not curated for this model -> "unknown".
+    assert m["warranty_status"] == "unknown"
 
 
 def test_get_manual_projection_unknown():

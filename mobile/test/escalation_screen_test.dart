@@ -111,6 +111,7 @@ void main() {
     await tester.tap(find.text('Contact LG'));
     await tester.pumpAndSettle();
 
-    expect(contacted, 'support@lg.com');
+    // Calling is now the default contact action, so the phone number is handed to onContact.
+    expect(contacted, '1-800-243-0000');
   });
 }

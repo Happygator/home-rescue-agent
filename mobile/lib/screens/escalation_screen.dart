@@ -131,20 +131,32 @@ class _EscalationScreenState extends State<EscalationScreen> {
     final escalation = _escalation;
     if (escalation == null) return;
     final recipient = escalation.recipient;
+    final phone = escalation.phone?.trim();
 
     try {
       if (widget.onContact != null) {
-        await widget.onContact!(recipient);
+        await widget.onContact!(phone?.isNotEmpty == true ? phone! : recipient);
         return;
       }
-      final uri = Uri.parse(
-        'mailto:$recipient?subject=${Uri.encodeComponent('Service request $_caseId')}',
-      );
+
+      final uri = phone?.isNotEmpty == true
+          ? Uri(scheme: 'tel', path: phone)
+          : Uri(
+              scheme: 'mailto',
+              path: recipient,
+              queryParameters: {'subject': 'Service request $_caseId'},
+            );
       final launched = await launchUrl(uri);
       if (!mounted) return;
       if (!launched) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open email app')),
+          SnackBar(
+            content: Text(
+              phone?.isNotEmpty == true
+                  ? 'Could not open phone app'
+                  : 'Could not open email app',
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -301,9 +313,6 @@ class _EscalationScreenState extends State<EscalationScreen> {
 
   Widget _packetContentsCard(IssueDetail detail, Packet packet) {
     final middot = String.fromCharCode(0x00B7);
-    final warranty = packet.warrantyStatus;
-    final warrantyNeedsCheck =
-        warranty == null || warranty.toLowerCase().contains('check');
     return _card(
       borderColor: AppColors.cardBorder,
       child: Column(
@@ -342,12 +351,6 @@ class _EscalationScreenState extends State<EscalationScreen> {
             '$_done of $_total done',
             valueColor: _complete ? AppColors.stepDone : const Color(0xFFB45309),
             strong: true,
-          ),
-          const SizedBox(height: 10),
-          _contentRow(
-            warrantyNeedsCheck ? _emptyRing() : _checkMark(),
-            'Warranty status',
-            warranty ?? 'checking...',
           ),
         ],
       ),
@@ -423,6 +426,17 @@ class _EscalationScreenState extends State<EscalationScreen> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'When you call, support will walk you through these same checks. '
+            'Doing them first means you will be more prepared, and may even fix '
+            'the issue before you reach anyone.',
+            style: TextStyle(
+              fontSize: 10.5,
+              height: 1.4,
+              color: AppColors.textMuted,
+            ),
           ),
           const SizedBox(height: 12),
           ...rows,

@@ -136,6 +136,7 @@ def build_seed() -> dict[str, IssueDetail]:
         ),
         escalation=Escalation(
             recipient="support@lg.com",
+            phone="1-800-243-0000",
             drafted_email=(
                 "Hello LG Customer Support,\n\nI need to schedule a service visit for my LG "
                 "refrigerator (model LFXS26973S). The compressor clicks repeatedly and the unit "
@@ -186,7 +187,7 @@ def build_seed() -> dict[str, IssueDetail]:
                 video_ref=None,
                 shots_captured=2,
                 shots_total=4,
-                warranty_status="checking...",
+                warranty_status="unknown",
             ),
             sent=False,
         ),

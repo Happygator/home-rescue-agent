@@ -67,6 +67,7 @@ class Packet(BaseModel):
 
 class Escalation(BaseModel):
     recipient: str
+    phone: Optional[str] = None
     drafted_email: str
     inspection_guide: list[InspectionShot] = Field(default_factory=list)
     escalation_steps: list[EscalationStep] = Field(default_factory=list)

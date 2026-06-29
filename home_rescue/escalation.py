@@ -5,7 +5,7 @@ Draft/prepared ONLY -- nothing is auto-sent. The packet references an inspection
 """
 from __future__ import annotations
 
-from home_rescue.appliances import fridge
+from home_rescue.appliances import fridge, module_for
 from home_rescue.grounding import get_escalation_steps, get_inspection_shots, get_manual
 from home_rescue.transitions import transition
 
@@ -20,11 +20,18 @@ _FAULT_KEYWORDS = {
 }
 
 
-def support_contact_for(brand):
-    """Return {name,email,phone} for the brand, falling back to DEFAULT_SUPPORT_CONTACT."""
+def support_contact_for(brand, appliance=None):
+    """Return {name,email,phone} for a brand within the appliance's curated support contacts,
+    falling back to that appliance module's DEFAULT_SUPPORT_CONTACT.
+
+    Appliance-aware: an LG dishwasher resolves LG's real number from the dishwasher module instead
+    of dropping to the generic default (the fridge module has no LG entry)."""
+    mod = module_for(appliance)
+    default = getattr(mod, "DEFAULT_SUPPORT_CONTACT", fridge.DEFAULT_SUPPORT_CONTACT)
     if not brand:
-        return dict(fridge.DEFAULT_SUPPORT_CONTACT)
-    return dict(fridge.SUPPORT_CONTACTS.get(brand.upper(), fridge.DEFAULT_SUPPORT_CONTACT))
+        return dict(default)
+    contacts = getattr(mod, "SUPPORT_CONTACTS", {})
+    return dict(contacts.get(brand.upper(), default))
 
 
 def fault_class_for(case):
@@ -51,6 +58,7 @@ def manual_ref_for(case):
         "error_code_url": manual.get("error_code_url"),
         "error_code_page": pages.get("service_error_codes") or pages.get("error_codes"),
         "warranty_note": manual.get("warranty_note"),
+        "warranty_status": manual.get("warranty_status"),
     }
 
 
@@ -64,7 +72,7 @@ def generate_escalation_draft(case, store=None):
     brand = case.get("brand") or "Unknown"
     model = case.get("model_number") or "Unknown model"
     appliance = case.get("appliance") or "appliance"
-    contact = support_contact_for(case.get("brand"))
+    contact = support_contact_for(case.get("brand"), case.get("appliance"))
     data = case.get("data") or {}
     symptom = data.get("symptom_text") or "(symptom not recorded)"
     steps = data.get("steps") or []
@@ -150,7 +158,7 @@ def assemble_packet(case, inspection_guide, video_ref=None):
         "max_shot_seconds": MAX_SHOT_SECONDS,
         "shots_captured": 0,
         "shots_total": len(inspection_guide),
-        "warranty_status": (manual["warranty_note"] if manual and manual.get("warranty_note") else "checking..."),
+        "warranty_status": (manual.get("warranty_status") if manual and manual.get("warranty_status") else "unknown"),
         "manual": manual,
     }
 
@@ -172,6 +180,7 @@ def escalate_case(case_id, store, video_ref=None, safety_forced=False):
     steps = get_escalation_steps(case.get("appliance"), case.get("brand"))
     escalation = {
         "recipient": draft["recipient"],
+        "phone": draft["phone"],
         "drafted_email": draft["drafted_email"],
         "subject": draft["subject"],
         "inspection_guide": guide,

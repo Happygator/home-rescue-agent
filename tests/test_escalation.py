@@ -64,6 +64,29 @@ def test_draft_has_model_steps_contact_and_never_sends(tmp_path):
     assert draft["sent"] is False
 
 
+def test_dishwasher_draft_uses_per_brand_contact(tmp_path):
+    # Support contacts resolve from the appliance's own module: an LG dishwasher must get LG's real
+    # number, not the generic default (the fridge module has no LG entry).
+    store = CaseStore(tmp_path / "lg_dishwasher.db")
+    store.new_case(
+        "case-dw",
+        "user-1",
+        appliance="dishwasher",
+        brand="LG",
+        model_number="LDFC2423V",
+        status="diagnosing",
+        symptom_text="Not draining; standing water in the bottom.",
+        error_code=None,
+    )
+    case = store.load_case("case-dw")
+
+    draft = generate_escalation_draft(case)
+
+    assert draft["recipient"] == "support@lg.com"
+    assert draft["phone"] == "1-800-243-0000"
+    assert draft["recipient_name"] == "LG"
+
+
 def test_inspection_guide_with_error_code(tmp_path):
     _, case = _case_with_history(tmp_path, error_code="OF OF")
 
@@ -143,6 +166,8 @@ def test_escalate_case_sets_status_and_persists(tmp_path):
     assert reloaded["status"] == "escalated"
     assert reloaded["data"]["escalation"]["inspection_guide"]
     assert reloaded["data"]["escalation"]["packet"]
+    # The brand support phone number is surfaced for the call-first contact action.
+    assert reloaded["data"]["escalation"]["phone"]
     assert escalation["sent"] is False
     assert second["sent"] is False
     assert reloaded_again["status"] == "escalated"
@@ -174,7 +199,9 @@ def test_packet_and_draft_cite_curated_manual(tmp_path):
     assert packet["manual"] is not None
     assert "manualslib.com" in packet["manual"]["manual_url"]
     assert packet["manual"]["error_code_page"] == 65
-    assert packet["warranty_status"] != "checking..."
+    # No actual per-unit warranty status is curated for this model, so it is "unknown"
+    # (the generic warranty_note is no longer surfaced as the status).
+    assert packet["warranty_status"] == "unknown"
 
     draft = generate_escalation_draft(case)
     assert "manualslib.com" in draft["body"]
@@ -197,5 +224,5 @@ def test_packet_manual_none_for_uncurated_model(tmp_path):
 
     packet = assemble_packet(case, generate_inspection_guide(case))
     assert packet["manual"] is None
-    assert packet["warranty_status"] == "checking..."
+    assert packet["warranty_status"] == "unknown"
     assert "Manufacturer manual:" not in generate_escalation_draft(case)["body"]

@@ -158,9 +158,12 @@ def test_infer_appliance_from_symptom_text():
     assert infer_appliance("dishes come out dirty") == "dishwasher"
     assert infer_appliance("Fridge is warm but freezer is cold") == "refrigerator"
     assert infer_appliance("the refrigerator ice maker stopped") == "refrigerator"
-    # "washer" must NOT fire inside "dishwasher" (word-boundary guard).
-    assert infer_appliance("Washer won't spin, clothes are soaking wet") == "washer"
-    assert infer_appliance("the washing machine is leaking") == "washer"
+    # Washers are not a supported appliance: inference must degrade to None rather than
+    # mislabel the case (which would serve the wrong appliance's curated fixes).
+    assert infer_appliance("Washer won't spin, clothes are soaking wet") is None
+    assert infer_appliance("the washing machine is leaking") is None
+    # "washer" must NOT fire inside "dishwasher" (word-boundary guard still holds).
+    assert infer_appliance("Dishwasher won't drain") == "dishwasher"
     # No clear hint -> None (so the case is NOT mislabeled as a refrigerator).
     assert infer_appliance("it is making a weird noise") is None
     assert infer_appliance("") is None

@@ -78,20 +78,12 @@ def default_turn(case, recap, text, *, store, image_path=None):
             "agent turn failed, serving fallback reply: %s: %s", type(exc).__name__, exc
         )
         reply = FALLBACK_REPLY
-    # Escalation backstop. The model sometimes ANNOUNCES escalation in prose without calling
-    # generate_escalation_draft, leaving the case in 'diagnosing' with no service packet, so the UI
-    # never offers the escalation flow. If the reply says it is escalating but the case did not
-    # actually escalate this turn, force it so the words and the case state agree. escalate_case only
-    # drafts (never sends), so a rare false trigger is harmless.
-    try:
-        if "escalat" in (reply or "").lower():
-            current = store.load_case(case["case_id"])
-            if current is not None and current.get("status") != "escalated":
-                from home_rescue import escalation as _esc
-                _esc.escalate_case(case["case_id"], store)
-    except Exception:
-        import logging
-        logging.getLogger("home_rescue").warning("escalation backstop failed", exc_info=True)
+    # No prose-based escalation backstop: the case escalates ONLY when the agent actually calls
+    # generate_escalation_draft (which drafts the packet and transitions the status) or when the user
+    # taps the manual "Escalate to a pro" button (POST /escalate). This lets the agent mention,
+    # suggest, or answer clarifying questions about escalation without a stray "escalat" in its prose
+    # force-escalating the case -- so an accidental tap or a "should I escalate?" question no longer
+    # commits the user to a service handoff.
     # Chunk the reply into clean word-group token events so the client streams visibly.
     # Each token is a whitespace-free-bounded chunk; the client re-joins tokens with a single
     # space (and the persistence layer normalizes whitespace), so do NOT add inter-chunk spaces

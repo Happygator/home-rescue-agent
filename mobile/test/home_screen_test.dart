@@ -23,9 +23,20 @@ void main() {
     );
   }
 
+  // A client that returns no issues for either status, to exercise the empty state.
+  ApiClient emptyClient() => ApiClient(
+        baseUrl: 'http://test',
+        client: MockClient((request) async => http.Response.bytes(utf8.encode('[]'), 200)),
+      );
+
   Widget app() => MaterialApp(
         theme: buildAppTheme(),
         home: HomeScreen(client: fixtureClient()),
+      );
+
+  Widget appWith(ApiClient client) => MaterialApp(
+        theme: buildAppTheme(),
+        home: HomeScreen(client: client),
       );
 
   // A tall phone-sized surface so all cards + the footer render (a ListView does not
@@ -50,6 +61,23 @@ void main() {
     expect(find.text('ESCALATED'), findsOneWidget);
     expect(find.text('View resolved (4)'), findsOneWidget);
     expect(find.text('Door alarm kept beeping.'), findsNothing);
+  });
+
+  testWidgets('shows a blurb when there are no open issues', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(420, 2200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(appWith(emptyClient()));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(IssueCard), findsNothing);
+    expect(find.text('No open issues'), findsOneWidget);
+    expect(find.text("You're all caught up. Tap the + button to start a new repair."),
+        findsOneWidget);
+
+    // Toggling to the (also empty) resolved view swaps in the resolved blurb.
+    await tester.tap(find.text('View resolved (0)'));
+    await tester.pumpAndSettle();
+    expect(find.text('No resolved issues yet'), findsOneWidget);
   });
 
   testWidgets('toggles to resolved issues', (tester) async {
