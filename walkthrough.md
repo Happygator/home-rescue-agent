@@ -108,8 +108,13 @@ Pick the target that matches how you're demoing:
 ```powershell
 # --- From the mobile/ directory ---
 
-# Web (Chrome) — quickest to see it
-flutter run -d chrome
+# Web (Chrome) — quickest to see it.
+# Always pass a FIXED --web-port so the origin (and therefore the browser
+# localStorage that holds the device id / saved issues) stays the same every
+# run. Without it, Flutter picks a random port each launch -> a new origin ->
+# the app looks like a brand-new user and "loses" prior issues. Helper:
+#   ../scripts/run_web.ps1
+flutter run -d chrome --web-hostname=127.0.0.1 --web-port=8080
 
 # Windows desktop
 flutter run -d windows
@@ -199,7 +204,8 @@ flutter test
 # Terminal 2 — Flutter app (mobile/)
 cd mobile
 flutter pub get
-flutter run -d chrome          # or: flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000  (Android emulator)
+flutter run -d chrome --web-hostname=127.0.0.1 --web-port=8080   # fixed port: keeps the same origin/localStorage each run
+# or: flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000  (Android emulator)
 ```
 
 Open the app → the Home list loads from the backend (empty on a fresh database) → tap **+ New Issue** to start a diagnosis. Live chat and photo reads require Gemini quota; with quota depleted, demo from the captured fixtures (`tests/evals/fixtures/`) so a 429 never blocks you.

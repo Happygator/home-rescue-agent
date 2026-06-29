@@ -122,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       backgroundColor: AppColors.bg,
       body: Column(
         children: [
-          const AppHeader(title: 'HomeRescue', homeBrand: true, trailing: AccountAvatar()),
+          const AppHeader(title: 'HomeRescue', homeBrand: true),
           Expanded(child: _buildBody(list)),
         ],
       ),

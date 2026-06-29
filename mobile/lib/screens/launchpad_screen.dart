@@ -40,7 +40,6 @@ class LaunchpadScreen extends StatelessWidget {
           const AppHeader(
             title: 'HomeRescue',
             homeBrand: true,
-            trailing: _GradientAvatar(),
           ),
           Container(
             height: 3,
@@ -302,29 +301,4 @@ class _ApplianceTile extends StatelessWidget {
       ),
     );
   }
-}
-
-/// A gradient version of the account avatar, used in the Launchpad header.
-class _GradientAvatar extends StatelessWidget {
-  const _GradientAvatar();
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 30,
-    height: 30,
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Color(0xFF2563EB), Color(0xFF7C3AED), Color(0xFFF59E0B)],
-      ),
-      shape: BoxShape.circle,
-    ),
-    alignment: Alignment.center,
-    child: const Text(
-      'A',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.w700,
-        fontSize: 12,
-      ),
-    ),
-  );
 }

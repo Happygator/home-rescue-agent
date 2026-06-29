@@ -4,7 +4,7 @@ FALLBACK_REPLY = ("I'm having trouble reaching the diagnosis service right now, 
                   "saved. Please try again in a moment.")
 
 
-def default_turn(case, recap, text, *, store, image_path=None):
+async def default_turn(case, recap, text, *, store, image_path=None):
     """Reopen-every-turn agent turn -> yields SSE event dicts. Runs the ADK agent in a fresh
     session with the recap injected; on ANY error (e.g. quota/network) yields a graceful fallback
     so the stream never 500s. When image_path points at a readable file, it is attached to the
@@ -69,7 +69,7 @@ def default_turn(case, recap, text, *, store, image_path=None):
                             out.append(p.text)
             return "".join(out) or FALLBACK_REPLY
 
-        reply = asyncio.run(_run())
+        reply = await _run()
     except Exception as exc:
         # Graceful degradation for the user, but DON'T swallow the cause: log it so a transient
         # rate-limit (429) is distinguishable from a real outage in the server logs.

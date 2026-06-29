@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'nav.dart';
+import 'device_id.dart';
 import 'screens/root_scaffold.dart';
 import 'screens/issue_detail_screen.dart';
 import 'screens/escalation_screen.dart';
 import 'screens/new_issue_screen.dart';
 
-void main() => runApp(const HomeRescueApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Establish this device's anonymous user id before the first API call.
+  await DeviceId.init();
+  runApp(const HomeRescueApp());
+}
 
 // Optional deep-link entry point used for deterministic screenshots/QA. Normal launches
 // (no dart-define) land on Home. Build with e.g.

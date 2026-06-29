@@ -8,7 +8,7 @@ import uuid
 from pathlib import Path
 
 import uvicorn
-from fastapi import Body, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Body, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 
@@ -49,6 +49,18 @@ def _now_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+async def _aiter_events(source):
+    """Iterate a turn_fn result that may be a sync OR async generator of event dicts.
+    default_turn is now an async generator (runs on the server's event loop); injected
+    test fakes are plain sync generators. This adapter consumes either."""
+    if hasattr(source, "__aiter__"):
+        async for ev in source:
+            yield ev
+    else:
+        for ev in source:
+            yield ev
+
+
 def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
     store = store or CaseStore(os.environ.get("APP_DB", "home_rescue.db"))
     if seed:
@@ -78,8 +90,13 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         return case
 
     @app.get("/api/issues", response_model=list[IssueSummary])
-    def list_issues(status: str = "open") -> list[IssueSummary]:
-        issues = store.list_cases()
+    def list_issues(
+        status: str = "open",
+        x_user_id: str | None = Header(default=None),
+    ) -> list[IssueSummary]:
+        # Scope the list to the calling device when it sends an id; with no
+        # header (older clients / tests) fall back to returning every case.
+        issues = store.list_cases(user_id=x_user_id)
         if status == "open":
             issues = [issue for issue in issues if issue["status"] != "resolved"]
         elif status == "resolved":
@@ -92,12 +109,18 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         return case_to_detail(_load(case_id))
 
     @app.post("/api/issues", response_model=CreateIssueResponse)
-    def create_issue(payload: CreateIssueRequest = Body(...)) -> CreateIssueResponse:
+    def create_issue(
+        payload: CreateIssueRequest = Body(...),
+        x_user_id: str | None = Header(default=None),
+    ) -> CreateIssueResponse:
         case_id = _new_id()
         appliance = payload.appliance or infer_appliance(payload.symptom)
+        # The device header is the source of truth for ownership; fall back to
+        # the body field, then the shared default for header-less callers.
+        owner = x_user_id or payload.user_id or "user-default"
         store.new_case(
             case_id,
-            payload.user_id or "user-default",
+            owner,
             appliance=appliance,
             brand=payload.brand,
             model_number=payload.model_number,
@@ -198,7 +221,7 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         return PlateResponse(brand=brand, model=model, error_code=error_code)
 
     @app.post("/api/issues/{case_id}/message")
-    def message_issue(
+    async def message_issue(
         case_id: str,
         payload: MessageRequest = Body(...),
     ) -> StreamingResponse:
@@ -209,12 +232,12 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         ref = payload.media_ref
         image_path = str(MEDIA_ROOT / case_id / ref) if ref else None
 
-        def generator():
+        async def generator():
             parts = []
             kwargs = {"store": store}
             if image_path:
                 kwargs["image_path"] = image_path
-            for ev in turn_fn(case, recap, payload.text, **kwargs):
+            async for ev in _aiter_events(turn_fn(case, recap, payload.text, **kwargs)):
                 if isinstance(ev, dict) and ev.get("type") == "token" and ev.get("text"):
                     parts.append(ev["text"])
                 yield f"data: {json.dumps(ev)}\n\n"
@@ -237,7 +260,7 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         )
 
     @app.post("/api/issues/{case_id}/start")
-    def start_issue(case_id: str) -> StreamingResponse:
+    async def start_issue(case_id: str) -> StreamingResponse:
         """Auto-kickoff: run ONE agent turn so Gemini produces the first fix for a freshly created
         case, instead of waiting for the user to type. One-shot and idempotent: only an `intake`
         case with a symptom is eligible, and the turn moves it out of `intake` so it never re-fires.
@@ -255,7 +278,7 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
             ref = media[-1]["ref"] if media else None
         image_path = str(MEDIA_ROOT / case_id / ref) if ref else None
 
-        def generator():
+        async def generator():
             if not eligible:
                 yield f'data: {json.dumps({"type": "done", "status": case["status"]})}\n\n'
                 return
@@ -263,7 +286,7 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
             kwargs = {"store": store}
             if image_path:
                 kwargs["image_path"] = image_path
-            for ev in turn_fn(case, store.recap(case_id), symptom, **kwargs):
+            async for ev in _aiter_events(turn_fn(case, store.recap(case_id), symptom, **kwargs)):
                 if isinstance(ev, dict) and ev.get("type") == "token" and ev.get("text"):
                     parts.append(ev["text"])
                 yield f"data: {json.dumps(ev)}\n\n"

@@ -973,6 +973,22 @@
               "title": "Status",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "x-user-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
           }
         ],
         "responses": {
@@ -1005,6 +1021,24 @@
       },
       "post": {
         "operationId": "create_issue_api_issues_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-user-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-User-Id"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {

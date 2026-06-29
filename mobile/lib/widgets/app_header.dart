@@ -44,15 +44,3 @@ class AppHeader extends StatelessWidget {
     );
   }
 }
-
-/// The round "A" account avatar used on the Home header.
-class AccountAvatar extends StatelessWidget {
-  const AccountAvatar({super.key});
-  @override
-  Widget build(BuildContext context) => Container(
-        width: 30, height: 30,
-        decoration: const BoxDecoration(color: Color(0xFF334155), shape: BoxShape.circle),
-        alignment: Alignment.center,
-        child: const Text('A', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
-      );
-}
