@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-import app.fast_api_app as fast_api_app
 from app.fast_api_app import create_app
 from home_rescue.case_store import CaseStore
 from home_rescue.next_step import ESCALATED_NEXT
@@ -41,7 +40,7 @@ def test_create_then_derived_next_step_in_list(tmp_path):
 
 def test_media_lands_on_filesystem(tmp_path, monkeypatch):
     media_root = tmp_path / "media"
-    monkeypatch.setattr(fast_api_app, "MEDIA_ROOT", media_root)
+    monkeypatch.setenv("MEDIA_ROOT", str(media_root))
     client, _store, _calls = make_client(tmp_path)
     case_id = client.post("/api/issues", json={"appliance": "Refrigerator"}).json()["case_id"]
 
@@ -157,7 +156,7 @@ def test_message_turn_is_appended_to_transcript(tmp_path):
 
 def test_media_get_serves_uploaded_file(tmp_path, monkeypatch):
     media_root = tmp_path / "media"
-    monkeypatch.setattr(fast_api_app, "MEDIA_ROOT", media_root)
+    monkeypatch.setenv("MEDIA_ROOT", str(media_root))
     client, _store, _calls = make_client(tmp_path)
     case_id = client.post("/api/issues", json={"appliance": "Refrigerator"}).json()["case_id"]
     ref = client.post(
@@ -179,7 +178,7 @@ def test_media_get_serves_uploaded_file(tmp_path, monkeypatch):
 
 def test_start_passes_attached_image_to_agent(tmp_path, monkeypatch):
     media_root = tmp_path / "media"
-    monkeypatch.setattr(fast_api_app, "MEDIA_ROOT", media_root)
+    monkeypatch.setenv("MEDIA_ROOT", str(media_root))
     client, _store, calls = make_client(tmp_path)
     case_id = client.post("/api/issues", json={"appliance": "Refrigerator"}).json()["case_id"]
     ref = client.post(
@@ -206,7 +205,7 @@ def test_start_passes_attached_image_to_agent(tmp_path, monkeypatch):
 
 def test_message_passes_attached_image_to_agent(tmp_path, monkeypatch):
     media_root = tmp_path / "media"
-    monkeypatch.setattr(fast_api_app, "MEDIA_ROOT", media_root)
+    monkeypatch.setenv("MEDIA_ROOT", str(media_root))
     client, store, calls = make_client(tmp_path)
     case_id = client.post("/api/issues", json={"appliance": "Refrigerator"}).json()["case_id"]
     ref = client.post(

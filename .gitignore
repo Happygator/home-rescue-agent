@@ -264,3 +264,4 @@ mobile/build/
 mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 GEMINI_KEY.txt
+.dockerignore

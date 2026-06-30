@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'config.dart';
 import 'theme.dart';
 import 'nav.dart';
 import 'device_id.dart';
@@ -9,6 +10,8 @@ import 'screens/new_issue_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Surface which backend this build talks to (helps catch a dev/prod mismatch at a glance).
+  debugPrint('[HomeRescue] backend: ${AppConfig.baseUrl} (env: ${AppConfig.environment})');
   // Establish this device's anonymous user id before the first API call.
   await DeviceId.init();
   runApp(const HomeRescueApp());

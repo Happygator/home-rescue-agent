@@ -5,6 +5,35 @@ from app.models import (ChatTurn, Diagnosis, Escalation, EscalationStep, Inspect
 from home_rescue.next_step import derive_next_step
 
 
+# Phrases in an agent reply that indicate it is RECOMMENDING a professional / escalation. Used only
+# to SURFACE an in-chat escalation button (never to auto-commit the case to escalation).
+_ESCALATION_SUGGESTION_PHRASES = (
+    "professional", "technician", "schedule a service", "schedule service", "service visit",
+    "call support", "contact support", "qualified", "escalate",
+)
+# Specific negations that mean the opposite ("no need for a pro"); when present we do NOT suggest.
+_ESCALATION_NEGATIONS = (
+    "no need for a pro", "no need for a professional", "don't need a pro",
+    "doesn't need a professional", "do not need a professional", "without a professional",
+    "not necessary to call", "no need to call",
+)
+
+
+def _suggests_escalation(case):
+    """True when the LAST agent message recommends a professional / escalation. Considers only the
+    most recent agent turn, so the hint clears once the agent moves on to another fix."""
+    messages = (case.get("data") or {}).get("messages") or []
+    last_agent = next((m for m in reversed(messages) if m.get("role") == "agent"), None)
+    if not last_agent:
+        return False
+    text = (last_agent.get("text") or "").lower()
+    if not text:
+        return False
+    if any(neg in text for neg in _ESCALATION_NEGATIONS):
+        return False
+    return any(phrase in text for phrase in _ESCALATION_SUGGESTION_PHRASES)
+
+
 def _title(case):
     return f"{case.get('brand') or 'New'} \u00b7 {case.get('appliance') or 'Appliance'}"
 
@@ -65,5 +94,7 @@ def case_to_detail(case):
         if diag else None,
         steps=steps, next_step=derive_next_step(case), media=media, messages=messages,
         escalation=_map_escalation(data.get("escalation")),
+        escalation_suggested=(case["status"] not in ("escalated", "resolved")
+                              and _suggests_escalation(case)),
         created_at=case.get("created_at") or "", updated_at=case.get("updated_at") or "",
     )

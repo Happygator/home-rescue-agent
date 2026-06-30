@@ -99,8 +99,10 @@ def default_plate(case_id, media_ref, store):
     """Read the spec plate for an uploaded media ref (Gemini). Degrades to all-None on error."""
     try:
         from home_rescue.tools import read_and_cache_plate
-        from pathlib import Path
-        photo = Path("media") / case_id / (media_ref or "")
+        from home_rescue.media_store import get_media_store
+        photo = get_media_store().local_path(case_id, media_ref or "")
+        if photo is None:
+            return {"brand": None, "model": None, "error_code": None}
         result = read_and_cache_plate(case_id, photo, store)
         return {"brand": result.get("brand"), "model": result.get("matched_model") or result.get("model_number"),
                 "error_code": result.get("error_code")}

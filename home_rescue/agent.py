@@ -13,17 +13,17 @@ from google.adk.agents import Agent
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.tools import ToolContext
 
-from home_rescue.case_store import CaseStore
+from home_rescue.case_store import make_case_store
 from home_rescue.transitions import transition
 from home_rescue.reopen import reopen_case
-from home_rescue.grounding import get_fixes, get_manual as _lookup_manual, _UNSET
+from home_rescue.grounding import get_fixes, get_manual as _lookup_manual, has_error_code_data, _UNSET
 from home_rescue.appliances import normalize_appliance
 from home_rescue.tools import read_spec_plate as _read_plate, validate_model, load_key
 from home_rescue import symptom_router
 from home_rescue import escalation as esc
 from home_rescue.safety import after_model_callback, before_tool_callback
 from home_rescue.mcp_server.toolset import maybe_mcp_toolset, mcp_enabled
-from home_rescue.mcp_server import projections as _oem
+from home_rescue.mcp_server.client import call_oem_tool
 
 AGENT_MODEL = os.environ.get("AGENT_MODEL", os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"))
 DEFAULT_DB = "home_rescue.db"
@@ -111,7 +111,7 @@ def core_record_step_result(store, case_id, step_id, instruction, user_result, o
 # ---------- ADK helpers ----------
 
 def _store(tool_context):
-    return CaseStore(tool_context.state.get("db_path", DEFAULT_DB))
+    return make_case_store(tool_context.state.get("db_path", DEFAULT_DB))
 
 
 async def initialize_state(callback_context: CallbackContext) -> None:
@@ -241,7 +241,7 @@ def initialize_new_case(appliance: str, brand: str, model_number: str, symptom_t
     return {"success": True, "case_id": case_id}
 
 
-def lookup_fixes(appliance: str, brand: str, model_number: str, symptom: str, error_code: str) -> dict:
+async def lookup_fixes(appliance: str, brand: str, model_number: str, symptom: str, error_code: str) -> dict:
     """Look up ranked, safety-approved fixes for the symptom/model/code.
 
     Args:
@@ -253,17 +253,23 @@ def lookup_fixes(appliance: str, brand: str, model_number: str, symptom: str, er
     Returns:
         dict with 'fixes' (ordered list of {instruction, safe, source, citation}), 'manual'
         (the model's manufacturer-manual reference, or None), and 'via' ('oem_workflow' when the
-        steps came from the OEM pre-service workflow, else 'curated').
+        steps came from the OEM pre-service workflow, else 'curated'). 'error_code_data_available'
+        is True when a known error code would change the recommended fix for this brand/model
+        (curated code data exists), so you should ask the user to read any code off the display
+        before relying on symptom-only fixes.
     """
     ec = error_code if (error_code and error_code.lower() != "none") else None
     fixes = None
     via = "curated"
-    # When the mock/real OEM MCP integration is enabled, the authoritative pre-service workflow is
-    # the source of the steps; fall back to the curated table if it yields nothing or errors
-    # (the design section 11 degrade-to-curated rule).
+    # When the OEM MCP integration is enabled, the authoritative pre-service workflow is the source
+    # of the steps, fetched over the MCP transport from the in-process mounted server; fall back to
+    # the curated table if it yields nothing or errors (the design section 11 degrade-to-curated rule).
     if mcp_enabled():
         try:
-            workflow = _oem.get_pre_service_workflow(model_number, symptom or "", ec or "")
+            workflow = await call_oem_tool(
+                "get_pre_service_workflow",
+                {"model": model_number, "symptom": symptom or "", "error_code": ec or ""},
+            )
             steps = workflow.get("steps") or []
             if steps:
                 fixes = [{"instruction": s["instruction"], "safe": s["safe"],
@@ -283,7 +289,9 @@ def lookup_fixes(appliance: str, brand: str, model_number: str, symptom: str, er
             symptom_key = symptom_router.classify_symptom(symptom, ec)
         fixes = get_fixes(appliance, brand, model_number, symptom, ec, symptom_key=symptom_key)
     manual = _lookup_manual(appliance, brand, model_number)
-    return {"fixes": fixes, "manual": manual, "via": via}
+    error_code_data = has_error_code_data(appliance, brand, model_number)
+    return {"fixes": fixes, "manual": manual, "via": via,
+            "error_code_data_available": error_code_data}
 
 
 def get_manual(appliance: str, brand: str, model_number: str) -> dict:
@@ -387,8 +395,9 @@ Rules:
      records it for later turns; the image itself is NOT kept, so never assume the photo is still
      visible on a future turn.
    If a plate is blurry or unreadable, say so and ask the user to retype the brand/model rather than
-   guessing. Ask the user for anything still missing. Do NOT propose a fix until these facts are
-   gathered.
+   guessing. If a photo is sideways, rotated, or upside down so you cannot read it, say so and ask
+   the user to re-send the image upright (rotated so the text reads left-to-right). Ask the user for
+   anything still missing. Do NOT propose a fix until these facts are gathered.
 2. USE THE EXISTING CASE. If the Case ID above is already set (anything other than 'Unknown'), the
    case ALREADY EXISTS - do NOT call initialize_new_case; use that exact Case ID for
    record_step_result and every other tool. When the user provides the brand, model number, or error
@@ -401,6 +410,12 @@ Rules:
    exactly ONE fix at a time, safest/easiest first. lookup_fixes also returns the model's 'manual'
    reference, and each fix has a 'citation'; you may note a step is from the <brand> manual and offer
    the manual link if the user wants detail - but stay brief and do NOT paste links into every step.
+   ASK FOR AN ERROR CODE WHEN IT HELPS. If lookup_fixes returns error_code_data_available true and
+   the Error code above is still 'None', do NOT propose a generic symptom fix yet: first ask the
+   user, in one short sentence, to check the appliance display for any error or fault code, because
+   for this brand/model a code points to the exact fix. Ask this only ONCE - if the user gives a
+   code, save it with update_case_facts; if they say there is no code (or do not know), proceed with
+   the symptom-based fixes below and never re-ask.
    Before proposing a fix, read "Steps taken" in the history recap and the conversation so far, and
    obey these rules:
    (a) RECORD BEFORE RE-PROPOSING. If you proposed a fix on an earlier turn and the user is now

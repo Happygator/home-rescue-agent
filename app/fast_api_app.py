@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import datetime
 import json
 import os
@@ -10,7 +11,7 @@ from pathlib import Path
 import uvicorn
 from fastapi import Body, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 
 from app.models import (
     CreateIssueRequest,
@@ -34,11 +35,10 @@ from app.store_mappers import case_to_detail, case_to_summary
 from app.turns import default_plate, default_turn
 from home_rescue import escalation as esc
 from home_rescue.appliances import infer_appliance
-from home_rescue.case_store import CaseStore
+from home_rescue.case_store import make_case_store
+from home_rescue.mcp_server.toolset import build_mounted_mcp_app, mcp_enabled
+from home_rescue.media_store import get_media_store
 from home_rescue.transitions import transition
-
-
-MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", "media"))
 
 
 def _new_id() -> str:
@@ -62,17 +62,32 @@ async def _aiter_events(source):
 
 
 def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
-    store = store or CaseStore(os.environ.get("APP_DB", "home_rescue.db"))
+    store = store or make_case_store(os.environ.get("APP_DB", "home_rescue.db"))
     if seed:
         seed_store(store)
     turn_fn = turn_fn or default_turn
     plate_fn = plate_fn or default_plate
+    media_store = get_media_store()
+
+    # Rung 1: when MCP is enabled, host the mock OEM MCP server in-process by mounting its
+    # streamable-HTTP ASGI app at /mcp and running its session-manager lifespan. The agent connects
+    # back over loopback (see toolset.mcp_url). A no-op when HOME_RESCUE_MCP is off.
+    mcp_app = build_mounted_mcp_app() if mcp_enabled() else None
+    lifespan = None
+    if mcp_app is not None:
+        @contextlib.asynccontextmanager
+        async def lifespan(_app):
+            async with mcp_app.router.lifespan_context(mcp_app):
+                yield
 
     app = FastAPI(
         title="HomeRescue API",
         version="0.1.0",
         description="Stub REST and SSE contract for the HomeRescue client.",
+        lifespan=lifespan,
     )
+    if mcp_app is not None:
+        app.mount("/mcp", mcp_app)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -174,9 +189,7 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         suffix = Path(file.filename or "").suffix or ".bin"
         media_kind = kind if kind in {"plate", "symptom", "inspection_video"} else "symptom"
         ref = f"{kind}-{uuid.uuid4().hex[:8]}{suffix}"
-        target_dir = MEDIA_ROOT / case_id
-        target_dir.mkdir(parents=True, exist_ok=True)
-        (target_dir / ref).write_bytes(content)
+        media_store.save(case_id, ref, content, file.content_type)
         data = case.get("data") or {}
         media = list(data.get("media") or [])
         media.append({
@@ -189,17 +202,17 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         return MediaResponse(ref=ref)
 
     @app.get("/api/issues/{case_id}/media/{ref}")
-    def get_media(case_id: str, ref: str) -> FileResponse:
+    def get_media(case_id: str, ref: str) -> Response:
         """Serve a previously uploaded media file so the client can render it inline in chat."""
         case = _load(case_id)
         media = (case.get("data") or {}).get("media") or []
         entry = next((m for m in media if m.get("ref") == ref), None)
         if entry is None:
             raise HTTPException(status_code=404, detail="Media not found")
-        path = MEDIA_ROOT / case_id / ref
-        if not path.is_file():
+        data = media_store.get_bytes(case_id, ref)
+        if data is None:
             raise HTTPException(status_code=404, detail="Media file missing")
-        return FileResponse(str(path), media_type=entry.get("mime") or "application/octet-stream")
+        return Response(content=data, media_type=entry.get("mime") or "application/octet-stream")
 
     @app.post("/api/issues/{case_id}/plate", response_model=PlateResponse)
     def read_plate(
@@ -230,7 +243,7 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         # When the user attaches a photo to a chat turn, hand it to the agent so it can read the
         # spec plate / assess the symptom in context (mirrors the auto-kickoff /start path).
         ref = payload.media_ref
-        image_path = str(MEDIA_ROOT / case_id / ref) if ref else None
+        image_path = media_store.local_path(case_id, ref) if ref else None
 
         async def generator():
             parts = []
@@ -276,7 +289,7 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         if ref is None:
             media = data.get("media") or []
             ref = media[-1]["ref"] if media else None
-        image_path = str(MEDIA_ROOT / case_id / ref) if ref else None
+        image_path = media_store.local_path(case_id, ref) if ref else None
 
         async def generator():
             if not eligible:

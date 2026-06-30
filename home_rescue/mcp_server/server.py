@@ -9,8 +9,12 @@ from __future__ import annotations
 from home_rescue.mcp_server import projections
 
 
-def build_server():
-    """Construct the FastMCP server exposing the 3 OEM tools. Requires the mcp SDK."""
+def build_server(streamable_http_path: str | None = None):
+    """Construct the FastMCP server exposing the 4 OEM tools. Requires the mcp SDK.
+
+    When streamable_http_path is given, the server's streamable-HTTP endpoint is served at that
+    path; the FastAPI backend mounts the app with path "/" under the "/mcp" route (rung 1).
+    """
     try:
         from mcp.server.fastmcp import FastMCP
     except ModuleNotFoundError as e:
@@ -18,7 +22,10 @@ def build_server():
             "The mock OEM MCP server requires the 'mcp' SDK. Install it with: pip install mcp"
         ) from e
 
-    server = FastMCP("home-rescue-mock-oem")
+    kwargs = {}
+    if streamable_http_path is not None:
+        kwargs["streamable_http_path"] = streamable_http_path
+    server = FastMCP("home-rescue-mock-oem", **kwargs)
 
     @server.tool()
     def get_manual(model: str) -> dict:

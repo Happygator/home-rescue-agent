@@ -518,7 +518,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: _share,
+        onPressed: _contact,
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: AppColors.primary,
@@ -528,7 +528,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
-        child: const Text('Share service packet'),
+        child: Text('Contact $_brand'),
       ),
     );
   }
@@ -538,7 +538,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
       width: double.infinity,
       height: 44,
       child: OutlinedButton(
-        onPressed: _contact,
+        onPressed: _share,
         style: OutlinedButton.styleFrom(
           backgroundColor: AppColors.card,
           foregroundColor: AppColors.textBody2,
@@ -548,7 +548,7 @@ class _EscalationScreenState extends State<EscalationScreen> {
           ),
           textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
-        child: Text('Contact $_brand'),
+        child: const Text('Share service packet'),
       ),
     );
   }

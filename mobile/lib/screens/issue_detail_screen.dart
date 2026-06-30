@@ -332,11 +332,9 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
         children: [
           AppHeader(title: detail?.displayTitle ?? 'Issue', showBack: true),
           if (detail != null) _subRow(detail),
-          if (detail != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-              child: CaseSummaryCard(detail: detail, onEscalate: () { _escalate(); }),
-            ),
+          // The case-summary card lives INSIDE the scrollable chat list (see _body), not as a
+          // fixed sibling here. Keeping it fixed made the Column overflow when the keyboard was
+          // open and the card expanded (header + subRow + card + input bar exceeded the viewport).
           Expanded(child: _body()),
           if (detail != null) _inputBar(),
         ],
@@ -365,17 +363,26 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
       controller: _scroll,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       children: [
+        // Pinned-no-more: the summary scrolls with the conversation so the layout can never
+        // overflow when the keyboard is up and the card is expanded.
+        CaseSummaryCard(detail: detail, onEscalate: () { _escalate(); }),
+        const SizedBox(height: 12),
         ..._messages.map((m) => ChatBubble(message: m)),
-        if (detail.status == 'escalated') _escalationCta(),
+        // Show the hand-off once escalation is committed (status flipped) OR the agent has
+        // recommended a pro in its latest reply but never flipped the status. In the latter
+        // case the button's tap is what actually escalates (POST /escalate), so prose only
+        // surfaces the button -- it never commits the case on its own.
+        if (detail.status == 'escalated' || detail.escalationSuggested) _escalationCta(detail.status != 'escalated'),
         const SizedBox(height: 8),
       ],
     );
   }
 
-  // Shown once the agent has escalated: an explicit hand-off into the service-packet
-  // (escalation info-gathering) screen, where the user reviews the drafted message,
-  // captures the guided inspection shots, and shares or contacts the pro.
-  Widget _escalationCta() {
+  // Shown once the agent has escalated (or recommended a pro): an explicit hand-off into the
+  // service-packet (escalation info-gathering) screen, where the user reviews the drafted message,
+  // captures the guided inspection shots, and shares or contacts the pro. When [suggestedOnly] is
+  // true the agent recommended a pro but has not committed the case; the button's tap escalates.
+  Widget _escalationCta(bool suggestedOnly) {
     return Padding(
       padding: const EdgeInsets.only(top: 6, bottom: 4),
       child: Container(
@@ -389,9 +396,9 @@ class _IssueDetailScreenState extends State<IssueDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Ready for a professional',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.nextStripText),
+            Text(
+              suggestedOnly ? 'A professional is recommended' : 'Ready for a professional',
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.nextStripText),
             ),
             const SizedBox(height: 4),
             const Text(

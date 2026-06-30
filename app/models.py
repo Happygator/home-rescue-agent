@@ -102,6 +102,10 @@ class IssueDetail(BaseModel):
     media: list[MediaRef] = Field(default_factory=list)
     messages: list[ChatTurn] = Field(default_factory=list)
     escalation: Optional[Escalation] = None
+    # True when the latest agent reply recommends a professional but the case has NOT yet been
+    # committed to escalation (status still pre-escalation). Surfaces an in-chat escalation button
+    # without auto-committing; the user's tap is what actually escalates.
+    escalation_suggested: bool = False
     created_at: str
     updated_at: str
 

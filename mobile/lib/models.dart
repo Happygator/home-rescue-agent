@@ -257,6 +257,9 @@ class IssueDetail {
   final List<MediaRef> media;
   final List<ChatTurn> messages;
   final Escalation? escalation;
+  // True when the agent's latest reply recommends a pro but the case is not yet escalated; the
+  // chat surfaces an escalation button off this even though the status has not flipped.
+  final bool escalationSuggested;
   final String createdAt;
   final String updatedAt;
 
@@ -275,6 +278,7 @@ class IssueDetail {
     required this.media,
     this.messages = const [],
     this.escalation,
+    this.escalationSuggested = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -304,6 +308,7 @@ class IssueDetail {
         escalation: j['escalation'] == null
             ? null
             : Escalation.fromJson(j['escalation'] as Map<String, dynamic>),
+        escalationSuggested: j['escalation_suggested'] as bool? ?? false,
         createdAt: j['created_at'] as String,
         updatedAt: j['updated_at'] as String,
       );
@@ -373,6 +378,7 @@ class IssueDetail {
                       },
                 'sent': escalation!.sent,
               },
+        'escalation_suggested': escalationSuggested,
         'created_at': createdAt,
         'updated_at': updatedAt,
       };

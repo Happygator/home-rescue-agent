@@ -35,7 +35,10 @@ def load_key() -> str:
     if not raw:
         raw = (os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY") or "").strip()
     if not raw:
-        raise RuntimeError("No Gemini API key. Put it in GEMINI_KEY.txt or set GOOGLE_API_KEY.")
+        raise RuntimeError(
+            "No Gemini API key. Put it in a file named exactly ./GEMINI_KEY.txt "
+            "(repo root, not any other filename) or set GOOGLE_API_KEY."
+        )
     for name in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GEMINI_KEY"):
         if raw.upper().startswith(name + "="):
             raw = raw.split("=", 1)[1].strip()

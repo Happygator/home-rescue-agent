@@ -60,6 +60,28 @@ def get_manual(appliance, brand, model_number):
     return None
 
 
+def has_error_code_data(appliance, brand, model_number=None):
+    """Return True when a known error/fault code would meaningfully change the fix for this
+    brand/model -- i.e. there is curated error-code data to act on.
+
+    True when the brand has any curated ERROR_CODES entries, OR the model's curated manual
+    carries an error-code reference (a service/error-code page or a manufacturer code URL).
+    Used to decide whether the agent should ask the user to read a code off the display before
+    falling back to symptom-only fixes.
+    """
+    if not brand:
+        return False
+    mod = module_for(appliance)
+    if getattr(mod, "ERROR_CODES", {}).get(brand.upper()):
+        return True
+    manual = get_manual(appliance, brand, model_number)
+    if manual:
+        pages = manual.get("pages") or {}
+        if manual.get("error_code_url") or pages.get("service_error_codes") or pages.get("error_codes"):
+            return True
+    return False
+
+
 def _manual_reference_step(error_code, brand, manual):
     """Build ONE 'look it up' fix step that CITES the manual, never guessing the code's meaning.
 
