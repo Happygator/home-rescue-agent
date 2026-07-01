@@ -14,14 +14,15 @@ class CaseSummaryCard extends StatefulWidget {
 class _CaseSummaryCardState extends State<CaseSummaryCard> {
   bool _expanded = false;
 
-  // Brand + model (whichever are known) for the summary's Model line; the no-brand compact
-  // fridge shows just the model code, and a not-yet-identified case reads clearly.
+  // Brand and model shown on their own summary lines; each reads 'not identified yet' until known.
+  String _brandText(IssueDetail d) {
+    final b = d.brand?.trim() ?? '';
+    return b.isEmpty ? 'not identified yet' : b;
+  }
+
   String _modelText(IssueDetail d) {
-    final parts = [d.brand, d.modelNumber]
-        .where((s) => s != null && s.trim().isNotEmpty)
-        .cast<String>()
-        .toList();
-    return parts.isEmpty ? 'not identified yet' : parts.join(' ${String.fromCharCode(0x00b7)} ');
+    final m = d.modelNumber?.trim() ?? '';
+    return m.isEmpty ? 'not identified yet' : m;
   }
 
   @override
@@ -52,6 +53,8 @@ class _CaseSummaryCardState extends State<CaseSummaryCard> {
           ),
           if (_expanded) ...[
             const SizedBox(height: 10),
+            Text('Brand: ${_brandText(d)}', style: const TextStyle(fontSize: 12.5, color: AppColors.textBody)),
+            const SizedBox(height: 6),
             Text('Model: ${_modelText(d)}', style: const TextStyle(fontSize: 12.5, color: AppColors.textBody)),
             const SizedBox(height: 6),
             Text('Symptom: ${d.symptom}', style: const TextStyle(fontSize: 12.5, color: AppColors.textBody)),

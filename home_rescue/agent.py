@@ -18,7 +18,7 @@ from home_rescue.transitions import transition
 from home_rescue.reopen import reopen_case
 from home_rescue.grounding import get_fixes, get_manual as _lookup_manual, has_error_code_data, _UNSET
 from home_rescue.appliances import normalize_appliance
-from home_rescue.tools import read_spec_plate as _read_plate, validate_model, load_key
+from home_rescue.tools import validate_model, load_key
 from home_rescue import symptom_router
 from home_rescue import escalation as esc
 from home_rescue.safety import after_model_callback, before_tool_callback
@@ -28,6 +28,26 @@ from home_rescue.mcp_server.client import call_oem_tool
 AGENT_MODEL = os.environ.get("AGENT_MODEL", os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"))
 DEFAULT_DB = "home_rescue.db"
 VALID_OUTCOMES = ("resolved", "not_resolved", "unsure", "skipped")
+
+NO_ERROR_CODE = "none reported"
+_NO_CODE_ANSWERS = {
+    "", "none", "no", "no code", "no codes", "no error", "no error code",
+    "no error code reported", "none reported", "n/a", "na", "nil", "nothing",
+    "unknown", "no display", "no fault code",
+}
+
+
+def _clean_error_code(value):
+    """Normalize a raw error-code answer.
+
+    Returns the real code string, or None when the value is empty or a none-like answer
+    ('none', 'no code', the NO_ERROR_CODE sentinel, etc.). This keeps the sentinel and a user's
+    'no code' reply from being mistaken for a real code by lookup_fixes / the curated table.
+    """
+    code = (value or "").strip()
+    if code.lower() in _NO_CODE_ANSWERS:
+        return None
+    return code
 
 
 def _now():
@@ -128,20 +148,6 @@ async def initialize_state(callback_context: CallbackContext) -> None:
 
 # ---------- ADK tool wrappers ----------
 
-def read_spec_plate(photo_path: str) -> dict:
-    """Read brand/model_number/error_code from a spec-plate photo.
-
-    Args:
-        photo_path: Absolute path to the spec-plate photo.
-    Returns:
-        dict with 'brand', 'model_number', 'error_code'.
-    """
-    try:
-        return _read_plate(photo_path)
-    except Exception as e:
-        return {"brand": None, "model_number": None, "error_code": None, "error": str(e)}
-
-
 def verify_model_number(model_number: str, brand: str) -> dict:
     """Validate a model number against supported models.
 
@@ -164,7 +170,7 @@ def update_case_facts(brand: str, model_number: str, error_code: str,
     Args:
         brand: Brand name, or '' if still unknown.
         model_number: Model number, or '' if still unknown.
-        error_code: Error code on the display, or '' if none.
+        error_code: Error code on the display; '' if you have not asked yet, or 'none' if the user confirmed there is no code.
     Returns:
         dict with 'success' and the updated 'brand', 'model_number', 'error_code'.
     """
@@ -185,9 +191,14 @@ def update_case_facts(brand: str, model_number: str, error_code: str,
     if m:
         updates["model_number"] = m
         s["model_number"] = m
-    if ec and ec.lower() != "none":
-        updates["error_code"] = ec
-        s["error_code"] = ec
+    if ec:
+        # Distinguish "user confirmed there is no code" from "not asked yet" (empty string). An
+        # explicit none-like answer is recorded as the NO_ERROR_CODE sentinel so the recap and state
+        # both show it and the model stops re-asking for a code that does not exist.
+        cleaned = _clean_error_code(ec)
+        value = cleaned if cleaned is not None else NO_ERROR_CODE
+        updates["error_code"] = value
+        s["error_code"] = value
     if updates:
         store.save_case(case_id, **updates)
         s["history_summary"] = store.recap(case_id)
@@ -258,7 +269,7 @@ async def lookup_fixes(appliance: str, brand: str, model_number: str, symptom: s
         (curated code data exists), so you should ask the user to read any code off the display
         before relying on symptom-only fixes.
     """
-    ec = error_code if (error_code and error_code.lower() != "none") else None
+    ec = _clean_error_code(error_code)
     fixes = None
     via = "curated"
     # When the OEM MCP integration is enabled, the authoritative pre-service workflow is the source
@@ -386,10 +397,12 @@ Prior history recap:
 Rules:
 1. GATHER FIRST. Before recommending ANY fix you must know the appliance, brand, model number, and
    the symptom. When the user attaches a photo it is already visible to you THIS turn - read it
-   directly. Do NOT call read_spec_plate for an attached photo (that tool is only for flows that pass
-   a file path; it cannot see an inline image and will fail). First decide what the photo shows:
+   directly (there is no separate tool to call for an attached photo). First decide what the photo
+   shows:
    - A spec/data plate -> read the BRAND and the MODEL number (the model code, NOT the serial or part
      number) plus any error code, then call verify_model_number and save them with update_case_facts.
+     If you can make out the brand and model, report them plainly; NEVER say you were unable to read
+     the spec plate when you have in fact read those values.
    - A symptom (a leak, frost, a damaged part, a code on the display, etc.) -> describe plainly IN
      YOUR REPLY exactly what you observe (what it is and where). Stating it in your reply is what
      records it for later turns; the image itself is NOT kept, so never assume the photo is still
@@ -414,8 +427,9 @@ Rules:
    the Error code above is still 'None', do NOT propose a generic symptom fix yet: first ask the
    user, in one short sentence, to check the appliance display for any error or fault code, because
    for this brand/model a code points to the exact fix. Ask this only ONCE - if the user gives a
-   code, save it with update_case_facts; if they say there is no code (or do not know), proceed with
-   the symptom-based fixes below and never re-ask.
+   code, save it with update_case_facts; if they say there is no code (or do not know), call
+   update_case_facts with error_code='none' to record that there is no code, then proceed with the
+   symptom-based fixes below and never re-ask.
    Before proposing a fix, read "Steps taken" in the history recap and the conversation so far, and
    obey these rules:
    (a) RECORD BEFORE RE-PROPOSING. If you proposed a fix on an earlier turn and the user is now
@@ -463,7 +477,7 @@ time, stated plainly.
 def build_agent():
     _ensure_api_env()
     tools = [
-        read_spec_plate, verify_model_number, update_case_facts, reopen_existing_case, initialize_new_case,
+        verify_model_number, update_case_facts, reopen_existing_case, initialize_new_case,
         lookup_fixes, get_manual, record_step_result, generate_escalation_draft, generate_inspection_guide,
     ]
     # Gated mock OEM MCP server (off by default); falls back to the in-process curated tools.

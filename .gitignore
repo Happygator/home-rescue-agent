@@ -265,3 +265,19 @@ mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 GEMINI_KEY.txt
 .dockerignore
+/docs/icon-concepts
+
+# ---------------------------------------------------------------------------
+# Not necessary to run the application (research, docs, icon masters)
+# ---------------------------------------------------------------------------
+
+# Research / spike prototypes and their image datasets
+spikes/
+
+# Documentation, design docs, mockups, and rendered PDFs
+docs/
+walkthrough.md
+
+# Icon source masters (launcher icons are generated + committed under
+# mobile/android, mobile/ios, mobile/web; the masters are only regen inputs)
+mobile/assets/icon/

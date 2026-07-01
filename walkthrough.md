@@ -1,11 +1,22 @@
 # Walkthrough — Running HomeRescue
 
-This app has **two pieces** that run separately:
+> **The backend is already hosted.** It runs live on **Google Cloud Run**
+> (Firestore + GCS + Gemini) at
+> **https://home-rescue-1035771619142.us-central1.run.app**, and the Flutter
+> client **defaults to this hosted backend**. So a plain build of the app just
+> works against production — **no local server required**. Running the backend
+> locally (Section 1) is only needed for backend development or fully offline demos.
+>
+> **The client ships to mobile.** The Flutter app runs on **web, Windows desktop,
+> and mobile (Android / iOS)**, and can be **built into a standalone Android APK
+> and installed on a physical phone** — see [Section 5, Deployment](#5-deployment).
 
-1. **Backend** — a Python FastAPI server (REST + SSE) that wraps the ADK + Gemini agent and a SQLite case store.
-2. **Mobile client** — a Flutter app (the committed client surface) that talks to the backend over HTTP.
+This app has **two pieces**:
 
-You run the backend first, then point the Flutter app at it. All paths below are relative to the repo root:
+1. **Backend** — a Python FastAPI server (REST + SSE) that wraps the ADK + Gemini agent and a case store. **Currently deployed on Cloud Run** (Firestore for cases, GCS for media); it can also run locally against SQLite + local files.
+2. **Client** — a Flutter app (the committed client surface) that talks to the backend over HTTP.
+
+You can start the client straight away (it targets the hosted backend by default), or run the backend locally first and point the client at it. All paths below are relative to the repo root:
 
 ```
 C:\Users\arthu\Documents\Google Agentic AI Course\appliance-fixer
@@ -29,7 +40,12 @@ The agent reads its key from **`GEMINI_KEY.txt`** in the repo root (already pres
 
 ---
 
-## 1. Backend — FastAPI server
+## 1. Backend — FastAPI server (optional — a hosted one is already live)
+
+> **You can skip this whole section for a normal demo.** The client defaults to
+> the live Cloud Run backend, so run the steps below only if you're developing the
+> backend or want a fully local/offline stack. To use the hosted backend, jump to
+> [Section 2](#2-client--flutter-app).
 
 **Where:** repo root — `C:\Users\arthu\Documents\Google Agentic AI Course\appliance-fixer`
 
@@ -88,7 +104,10 @@ Leave this terminal running.
 
 ---
 
-## 2. Mobile client — Flutter app
+## 2. Client — Flutter app
+
+Runs on web, Windows desktop, and mobile (Android / iOS). To ship it as a
+standalone phone app, see [Section 5, Deployment](#5-deployment).
 
 **Where:** the `mobile/` subdirectory — `C:\Users\arthu\Documents\Google Agentic AI Course\appliance-fixer\mobile`
 
@@ -101,7 +120,7 @@ flutter pub get
 
 ### 2b. Run the app
 
-The base URL defaults to `http://127.0.0.1:8000`, which is correct for **web, desktop (Windows), and iOS simulator**. The **Android emulator** must use `10.0.2.2` to reach the host, so override it with `--dart-define`.
+The base URL **defaults to the hosted Cloud Run backend** (production), so a bare build connects to the deployed backend with no flags. To target a **local** backend instead, pass `--dart-define-from-file=config/dev.json` (web, desktop Windows, iOS simulator). The **Android emulator** must use `10.0.2.2` to reach the host, so override it with `--dart-define=API_BASE_URL=http://10.0.2.2:8000`.
 
 Pick the target that matches how you're demoing:
 
@@ -195,16 +214,88 @@ flutter test
 
 ---
 
+## 5. Deployment
+
+### 5a. Backend — hosted on Google Cloud Run (already live)
+
+The backend is **already deployed** and serving production traffic:
+
+| | |
+|---|---|
+| **Live URL** | https://home-rescue-1035771619142.us-central1.run.app |
+| **Platform** | Google Cloud Run · project `agentic-coding-project-499917` · region `us-central1` · service `home-rescue` |
+| **Cases DB** | Firestore Native (`(default)` database), collection `cases` |
+| **Media** | GCS bucket `agentic-coding-project-499917-home-rescue-media` |
+| **Gemini key** | Secret Manager secret `gemini-key`, mounted as env `GOOGLE_API_KEY` |
+
+The same Docker image runs locally against SQLite + local files; three env vars
+flip it to the cloud backends (`USE_FIRESTORE=1`, `GCS_BUCKET=…`,
+`FIRESTORE_PROJECT=…`). Backend selection is env-driven in
+`home_rescue/case_store.py` and `home_rescue/media_store.py`.
+
+**Redeploy** (from repo root — run `gcloud auth login` first if your token expired):
+
+```powershell
+gcloud run deploy home-rescue --source . --region us-central1 --allow-unauthenticated `
+  --service-account home-rescue-run@agentic-coding-project-499917.iam.gserviceaccount.com `
+  --set-env-vars USE_FIRESTORE=1,GCS_BUCKET=agentic-coding-project-499917-home-rescue-media,FIRESTORE_PROJECT=agentic-coding-project-499917 `
+  --set-secrets GOOGLE_API_KEY=gemini-key:latest `
+  --project agentic-coding-project-499917 --quiet
+```
+
+Full reference: `docs/CLOUD_RUN_DEPLOY.md`.
+
+### 5b. Mobile — build a standalone Android app
+
+Because the client defaults to the hosted backend, a release APK is fully
+self-contained — install it on a phone and it talks to Cloud Run with no local
+server. The `--dart-define-from-file=config/prod.json` below pins the production
+URL explicitly.
+
+```powershell
+# From the mobile/ directory
+flutter build apk --release --dart-define-from-file=config/prod.json
+```
+
+The APK lands at `mobile/build/app/outputs/flutter-apk/app-release.apk`. Install
+it on a connected device over ADB:
+
+```powershell
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+```
+
+Notes:
+- The **release build uses the debug signing config**, so no keystore is needed
+  for sideloading a demo build.
+- The launcher icon and `HomeRescue` home-screen label are already configured
+  (`flutter_launcher_icons` + `AndroidManifest.xml`).
+- **iOS** builds the same way (`flutter build ipa`) but needs an Apple signing
+  identity; Android is the tested path.
+
+---
+
 ## Quick start (TL;DR)
+
+**Fastest path — client only, against the hosted backend (no local server):**
+
+```powershell
+# Flutter app (mobile/) — targets the live Cloud Run backend by default
+cd mobile
+flutter pub get
+flutter run -d chrome --web-hostname=127.0.0.1 --web-port=8080   # fixed port: keeps the same origin/localStorage each run
+# or ship it to a phone:  flutter build apk --release --dart-define-from-file=config/prod.json
+```
+
+**Full local stack (backend + client) — for backend dev / offline demos:**
 
 ```powershell
 # Terminal 1 — backend (repo root)
 .venv\Scripts\python.exe -m uvicorn app.fast_api_app:app --host 0.0.0.0 --port 8000 --reload
 
-# Terminal 2 — Flutter app (mobile/)
+# Terminal 2 — Flutter app (mobile/), pointed at the local backend
 cd mobile
 flutter pub get
-flutter run -d chrome --web-hostname=127.0.0.1 --web-port=8080   # fixed port: keeps the same origin/localStorage each run
+flutter run -d chrome --web-hostname=127.0.0.1 --web-port=8080 --dart-define-from-file=config/dev.json
 # or: flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000  (Android emulator)
 ```
 

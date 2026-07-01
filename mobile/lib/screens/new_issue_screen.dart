@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../api/api_client.dart';
+import '../services/image_ops.dart';
 import '../services/media_capture.dart';
 import '../services/upload.dart';
 import '../theme.dart';
@@ -36,6 +37,7 @@ class _NewIssueScreenState extends State<NewIssueScreen> {
   final _text = TextEditingController();
   List<int>? _photo;
   bool _submitting = false;
+  bool _rotating = false;
   String? _error;
 
   @override
@@ -64,6 +66,21 @@ class _NewIssueScreenState extends State<NewIssueScreen> {
     final bytes = await MediaCapture().pickFromGallery();
     if (!mounted || bytes == null) return;
     setState(() => _photo = bytes);
+  }
+
+  /// Rotate the attached photo 90 degrees clockwise so the user can stand a
+  /// sideways/upside-down shot upright before it is uploaded. Re-encodes the
+  /// bytes so the rotation is baked in for the agent, not just the preview.
+  Future<void> _rotatePhoto() async {
+    final current = _photo;
+    if (current == null || _submitting || _rotating) return;
+    setState(() => _rotating = true);
+    final rotated = await rotateImage90(current);
+    if (!mounted) return;
+    setState(() {
+      _photo = rotated;
+      _rotating = false;
+    });
   }
 
   Future<void> _start() async {
@@ -230,15 +247,57 @@ class _NewIssueScreenState extends State<NewIssueScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Photo attached',
-              style: TextStyle(color: AppColors.textBody2, fontSize: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Photo attached',
+                  style: TextStyle(color: AppColors.textBody2, fontSize: 13),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    _rotating
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 8,
+                            ),
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : TextButton.icon(
+                            onPressed: _submitting ? null : _rotatePhoto,
+                            icon: const Icon(Icons.rotate_right, size: 18),
+                            label: const Text('Rotate'),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              minimumSize: const Size(0, 36),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                    TextButton(
+                      onPressed: (_submitting || _rotating)
+                          ? null
+                          : () => setState(() => _photo = null),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        minimumSize: const Size(0, 36),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text('Remove'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-          TextButton(
-            onPressed: _submitting ? null : () => setState(() => _photo = null),
-            child: const Text('Remove'),
           ),
         ],
       );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -112,13 +113,20 @@ class _EscalationScreenState extends State<EscalationScreen> {
     try {
       if (widget.onShare != null) {
         await widget.onShare!(shareText);
+        return;
+      }
+      // Attach the photos the user shared so they ride along with the email/share, not just as
+      // links in the body. Falls back to a text-only share when there are no images.
+      final files = await _imageAttachments();
+      if (files.isNotEmpty) {
+        await Share.shareXFiles(files, text: shareText);
       } else {
         await Share.share(shareText);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Shared')),
-        );
       }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Shared')),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -165,6 +173,33 @@ class _EscalationScreenState extends State<EscalationScreen> {
         SnackBar(content: Text('Could not contact service: $e')),
       );
     }
+  }
+
+  /// Download the still photos the user uploaded for this case so they can be attached to the
+  /// shared email. Best-effort: any image that fails to download is skipped rather than blocking
+  /// the share. The inspection video and non-image media are excluded.
+  Future<List<XFile>> _imageAttachments() async {
+    final detail = _detail;
+    if (detail == null) return const [];
+    final files = <XFile>[];
+    for (final m in detail.media) {
+      final isImage =
+          m.kind == 'plate' || m.kind == 'symptom' || m.mime.startsWith('image/');
+      if (!isImage) continue;
+      try {
+        final res = await http.get(Uri.parse(_api.mediaUrl(detail.caseId, m.ref)));
+        if (res.statusCode == 200 && res.bodyBytes.isNotEmpty) {
+          files.add(XFile.fromData(
+            res.bodyBytes,
+            mimeType: m.mime,
+            name: m.ref,
+          ));
+        }
+      } catch (_) {
+        // Skip an image that cannot be fetched; the rest of the share still goes through.
+      }
+    }
+    return files;
   }
 
   @override

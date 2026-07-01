@@ -78,6 +78,29 @@ async def default_turn(case, recap, text, *, store, image_path=None):
             "agent turn failed, serving fallback reply: %s: %s", type(exc).__name__, exc
         )
         reply = FALLBACK_REPLY
+    # Plate-fact backstop. When a photo was attached but the case still lacks a brand or model
+    # number after the turn, the agent failed to persist what it read; read the plate directly and
+    # fill ONLY the empty fields so the case summary reflects it. No extra vision call in the happy
+    # path -- this runs only when a field is still missing (i.e. the agent did not save it).
+    if image_path:
+        fresh = store.load_case(case["case_id"]) or {}
+        if not fresh.get("brand") or not fresh.get("model_number"):
+            try:
+                from home_rescue.tools import read_spec_plate, validate_model
+                pr = read_spec_plate(image_path)
+                b = (pr.get("brand") or "").strip()
+                raw = (pr.get("model_number") or "").strip()
+                matched = validate_model(raw, b or None)
+                m = (matched or raw).strip()
+                upd = {}
+                if b and not fresh.get("brand"):
+                    upd["brand"] = b
+                if m and not fresh.get("model_number"):
+                    upd["model_number"] = m
+                if upd:
+                    store.save_case(case["case_id"], **upd)
+            except Exception:
+                pass
     # No prose-based escalation backstop: the case escalates ONLY when the agent actually calls
     # generate_escalation_draft (which drafts the packet and transitions the status) or when the user
     # taps the manual "Escalate to a pro" button (POST /escalate). This lets the agent mention,

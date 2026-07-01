@@ -5,6 +5,8 @@ Draft/prepared ONLY -- nothing is auto-sent. The packet references an inspection
 """
 from __future__ import annotations
 
+import os
+
 from home_rescue.appliances import fridge, module_for
 from home_rescue.grounding import get_escalation_steps, get_inspection_shots, get_manual
 from home_rescue.transitions import transition
@@ -13,6 +15,38 @@ from home_rescue.transitions import transition
 MAX_SHOT_SECONDS = 20
 VIDEO_MIME = "video/mp4"          # H.264 in MP4 for OS share-sheet compatibility
 VIDEO_CODEC = "h264"
+
+# User-uploaded still photos (as opposed to the inspection video) carry these media kinds; any
+# media whose mime is image/* also counts so future kinds are handled too.
+_IMAGE_KINDS = {"plate", "symptom"}
+
+
+def shared_images(case):
+    """Return the still photos the user uploaded for this case (spec-plate and symptom shots), in
+    upload order. Each entry is the stored media dict {kind, ref, mime, ...}. The inspection video
+    and any non-image media are excluded."""
+    data = case.get("data") or {}
+    images = []
+    for m in data.get("media") or []:
+        ref = m.get("ref")
+        if not ref:
+            continue
+        kind = (m.get("kind") or "").lower()
+        mime = (m.get("mime") or "").lower()
+        if kind in _IMAGE_KINDS or mime.startswith("image/"):
+            images.append(m)
+    return images
+
+
+def media_link(case_id, ref):
+    """Build a retrievable link for an uploaded media ref. When MEDIA_PUBLIC_BASE_URL (or
+    PUBLIC_BASE_URL) is set the link is absolute so the brand can open it straight from the email;
+    otherwise the API-relative path is returned."""
+    base = (os.environ.get("MEDIA_PUBLIC_BASE_URL")
+            or os.environ.get("PUBLIC_BASE_URL") or "").rstrip("/")
+    path = f"/api/issues/{case_id}/media/{ref}"
+    return f"{base}{path}" if base else path
+
 
 _FAULT_KEYWORDS = {
     "sealed_system": ("compressor", "refrigerant", "sealed", "relay", "freon"),
@@ -84,6 +118,14 @@ def generate_escalation_draft(case, store=None):
     manual = manual_ref_for(case)
     manual_line = f"Manufacturer manual: {manual['manual_url']}\n\n" if manual and manual.get("manual_url") else ""
 
+    images = shared_images(case)
+    if images:
+        case_id = case.get("case_id") or ""
+        photo_lines = "\n".join(f"  - {media_link(case_id, m['ref'])}" for m in images)
+        photos_block = f"Photos I took of the issue (attached):\n{photo_lines}\n\n"
+    else:
+        photos_block = ""
+
     subject = f"Service request: {brand} {appliance} ({model})"
     body = (
         f"Hello {contact['name']} Support,\n\n"
@@ -91,6 +133,7 @@ def generate_escalation_draft(case, store=None):
         f"Symptom: {symptom}\n\n"
         f"Steps already tried:\n{tried}\n\n"
         f"These did not resolve the issue. Please advise on next steps or dispatch a technician.\n\n"
+        f"{photos_block}"
         f"{manual_line}"
         f"Thank you."
     )
@@ -101,6 +144,7 @@ def generate_escalation_draft(case, store=None):
         "subject": subject,
         "body": body,
         "drafted_email": body,
+        "images": [m.get("ref") for m in images],
         "sent": False,
     }
 

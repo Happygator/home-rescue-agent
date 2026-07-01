@@ -6,7 +6,7 @@
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
     <application
-        android:label="home_rescue"
+        android:label="HomeRescue"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
