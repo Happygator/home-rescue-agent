@@ -11,7 +11,7 @@ from pathlib import Path
 import uvicorn
 from fastapi import Body, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, Response, StreamingResponse
+from fastapi.responses import FileResponse, RedirectResponse, Response, StreamingResponse
 
 from app.models import (
     CreateIssueRequest,
@@ -103,6 +103,10 @@ def create_app(store=None, turn_fn=None, plate_fn=None, seed=False):
         if case is None:
             raise HTTPException(status_code=404, detail="Issue not found")
         return case
+
+    @app.get("/")
+    def root() -> RedirectResponse:
+        return RedirectResponse(url="https://home-rescue-4234e.web.app/")
 
     @app.get("/api/issues", response_model=list[IssueSummary])
     def list_issues(
