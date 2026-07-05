@@ -243,7 +243,9 @@ gcloud run deploy home-rescue --source . --region us-central1 --allow-unauthenti
   --project agentic-coding-project-499917 --quiet
 ```
 
-Full reference: `docs/CLOUD_RUN_DEPLOY.md`.
+The redeploy command above is self-contained: the same image runs locally
+against SQLite + local files, and the three env vars flip it to the cloud
+backends (Firestore + GCS).
 
 ### 5b. Mobile — build a standalone Android app
 

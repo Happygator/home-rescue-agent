@@ -274,10 +274,19 @@ GEMINI_KEY.txt
 # Research / spike prototypes and their image datasets
 spikes/
 
-# Documentation, design docs, mockups, and rendered PDFs
-docs/
-walkthrough.md
+# Documentation - keep only the two judge-facing docs (APP_SPEC + the
+# architecture diagram); ignore the internal planning/process docs.
+# walkthrough.md and README.md at the repo root stay tracked.
+docs/*
+!docs/APP_SPEC.md
+!docs/assets/
+docs/assets/*
+!docs/assets/architecture.svg
 
 # Icon source masters (launcher icons are generated + committed under
 # mobile/android, mobile/ios, mobile/web; the masters are only regen inputs)
 mobile/assets/icon/
+
+# Capstone submission materials (PowerPoint, writeup, video script/assets) —
+# work lives here, kept out of the repo.
+submission/
