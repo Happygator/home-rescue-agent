@@ -20,10 +20,6 @@ This app has **two pieces**:
 
 You can start the client straight away (it targets the hosted backend by default), or run the backend locally first and point the client at it. All paths below are relative to the repo root:
 
-```
-C:\Users\arthu\Documents\Google Agentic AI Course\appliance-fixer
-```
-
 > **Shell note:** commands are shown for **PowerShell** (the default shell on this machine). Where the Bash equivalent differs it is noted inline.
 
 ---

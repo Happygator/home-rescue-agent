@@ -280,7 +280,7 @@ The release build uses the debug signing config (no keystore needed for a demo s
 ## Submission
 
 - **Track:** Concierge Agents (safe-and-secure agents for individual/family challenges — the `SafetyGuard` story).
-- **Demo video:** _[add YouTube link before submitting]_ — also attached in the Kaggle Media Gallery.
+- **Demo video:** https://youtu.be/cVqKFien2oU — also attached in the Kaggle Media Gallery.
 - **Writeup:** the Kaggle writeup mirrors this repo's narrative — problem, why an agent, what it does, the build, and the roadmap.
 - **Project link:** https://github.com/Happygator/appliance-agent
 
