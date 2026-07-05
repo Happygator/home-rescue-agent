@@ -12,16 +12,7 @@ Solo capstone for the **Google × Kaggle 5-Day AI Agents Intensive: Vibe Coding*
 
 ## Demo
 
-▶ **Watch the 3½-minute walkthrough:** _[add YouTube link before submitting]_ · full narrative in the [Kaggle writeup](#submission).
-
-The video follows one real repair end to end:
-
-- **0:05** — Kevin's dishwasher stops mid-cycle, flashing `bE`. What is `bE`? Nobody knows. Two bad options: dig up the manual, or call and pay a call-out fee.
-- **0:48** — Photograph the spec plate; Gemini's vision reads the exact LG model and error code.
-- **1:15–1:51** — The one-step-at-a-time fix loop resolves a real `bE` (suds error) with the LG manual's actual remedy — and the case is marked **RESOLVED**.
-- **1:50–2:09** — A second case (_"sparks and a burning smell from the outlet behind the fridge"_) is **stopped on its first turn** with zero troubleshooting offered — the deterministic safety guard force-escalates.
-- **2:15–2:35** — The escalation packet: a steps-tried checklist, a drafted support email, and **Contact LG** opening the dialer with `1-800-243-0000` pre-filled.
-
+▶ Watch the [3½-minute walkthrough](https://youtu.be/cVqKFien2oU) · full narrative in the [Kaggle writeup](https://www.kaggle.com/competitions/vibecoding-agents-capstone-project/writeups/new-writeup-1783215153487).
 ---
 
 ## The problem
@@ -304,5 +295,7 @@ The release build uses the debug signing config (no keystore needed for a demo s
 | Evaluation | `tests/evals/run_evals.py` — scored, live-or-offline agent quality gate |
 
 ---
+## Credits
+Arthur Perng - Made the entire thing
 
-_Solo capstone — Google × Kaggle 5-Day AI Agents Intensive: Vibe Coding._
+Kevin - Video lead actor
