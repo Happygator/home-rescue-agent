@@ -2,13 +2,6 @@
 
 > **The app is already hosted — try it live:** **https://home-rescue-4234e.web.app/**
 >
-> **The backend is already hosted.** It runs live on **Google Cloud Run**
-> (Firestore + GCS + Gemini) at
-> **https://home-rescue-1035771619142.us-central1.run.app**, and the Flutter
-> client **defaults to this hosted backend**. So a plain build of the app just
-> works against production — **no local server required**. Running the backend
-> locally (Section 1) is only needed for backend development or fully offline demos.
->
 > **The client ships to mobile.** The Flutter app runs on **web, Windows desktop,
 > and mobile (Android / iOS)**, and can be **built into a standalone Android APK
 > and installed on a physical phone** — see [Section 5, Deployment](#5-deployment).
@@ -220,7 +213,7 @@ The backend is **already deployed** and serving production traffic:
 
 | | |
 |---|---|
-| **Live URL** | https://home-rescue-1035771619142.us-central1.run.app |
+| **Live URL** | `https://home-rescue-1035771619142.us-central1.run.app` |
 | **Platform** | Google Cloud Run · project `agentic-coding-project-499917` · region `us-central1` · service `home-rescue` |
 | **Cases DB** | Firestore Native (`(default)` database), collection `cases` |
 | **Media** | GCS bucket `agentic-coding-project-499917-home-rescue-media` |
@@ -298,5 +291,3 @@ flutter pub get
 flutter run -d chrome --web-hostname=127.0.0.1 --web-port=8080 --dart-define-from-file=config/dev.json
 # or: flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000  (Android emulator)
 ```
-
-Open the app → the Home list loads from the backend (empty on a fresh database) → tap **+ New Issue** to start a diagnosis. Live chat and photo reads require Gemini quota; with quota depleted, demo from the captured fixtures (`tests/evals/fixtures/`) so a 429 never blocks you.
