@@ -2,13 +2,6 @@
 
 > **The app is already hosted — try it live:** **https://home-rescue-4234e.web.app/**
 >
-> **The backend is already hosted.** It runs live on **Google Cloud Run**
-> (Firestore + GCS + Gemini) at
-> **https://home-rescue-1035771619142.us-central1.run.app**, and the Flutter
-> client **defaults to this hosted backend**. So a plain build of the app just
-> works against production — **no local server required**. Running the backend
-> locally (Section 1) is only needed for backend development or fully offline demos.
->
 > **The client ships to mobile.** The Flutter app runs on **web, Windows desktop,
 > and mobile (Android / iOS)**, and can be **built into a standalone Android APK
 > and installed on a physical phone** — see [Section 5, Deployment](#5-deployment).
