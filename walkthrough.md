@@ -213,7 +213,7 @@ The backend is **already deployed** and serving production traffic:
 
 | | |
 |---|---|
-| **Live URL** | https://home-rescue-1035771619142.us-central1.run.app |
+| **Live URL** | `https://home-rescue-1035771619142.us-central1.run.app` |
 | **Platform** | Google Cloud Run · project `agentic-coding-project-499917` · region `us-central1` · service `home-rescue` |
 | **Cases DB** | Firestore Native (`(default)` database), collection `cases` |
 | **Media** | GCS bucket `agentic-coding-project-499917-home-rescue-media` |
