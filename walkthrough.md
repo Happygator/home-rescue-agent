@@ -1,5 +1,7 @@
 # Walkthrough — Running HomeRescue
 
+> **The app is already hosted — try it live:** **https://home-rescue-4234e.web.app/**
+>
 > **The backend is already hosted.** It runs live on **Google Cloud Run**
 > (Firestore + GCS + Gemini) at
 > **https://home-rescue-1035771619142.us-central1.run.app**, and the Flutter
