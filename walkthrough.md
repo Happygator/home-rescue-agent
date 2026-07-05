@@ -291,5 +291,3 @@ flutter pub get
 flutter run -d chrome --web-hostname=127.0.0.1 --web-port=8080 --dart-define-from-file=config/dev.json
 # or: flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000  (Android emulator)
 ```
-
-Open the app → the Home list loads from the backend (empty on a fresh database) → tap **+ New Issue** to start a diagnosis. Live chat and photo reads require Gemini quota; with quota depleted, demo from the captured fixtures (`tests/evals/fixtures/`) so a 429 never blocks you.
