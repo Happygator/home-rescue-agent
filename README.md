@@ -12,7 +12,7 @@ Solo capstone for the **Google × Kaggle 5-Day AI Agents Intensive: Vibe Coding*
 
 ## Demo
 
-▶ Watch the [3½-minute walkthrough](https://youtu.be/cVqKFien2oU) · full narrative in the [Kaggle writeup](https://www.kaggle.com/competitions/vibecoding-agents-capstone-project/writeups/new-writeup-1783215153487).
+▶ Watch the [3½-minute walkthrough](https://youtu.be/qbdIQUzFJYY) · full narrative in the [Kaggle writeup](https://www.kaggle.com/competitions/vibecoding-agents-capstone-project/writeups/new-writeup-1783215153487).
 ---
 
 ## The problem
